@@ -20,7 +20,7 @@
  */
 package de.uni_koblenz.west.splendid.statistics;
 
-import static org.openrdf.query.QueryLanguage.SPARQL;
+import static org.eclipse.rdf4j.query.QueryLanguage.SPARQL;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,25 +32,25 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.openrdf.model.Resource;
-import org.openrdf.model.Statement;
-import org.openrdf.model.URI;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.model.vocabulary.RDF;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.TupleQuery;
-import org.openrdf.query.TupleQueryResult;
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.RepositoryResult;
-import org.openrdf.repository.sail.SailRepository;
-import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.RDFParseException;
-import org.openrdf.rio.Rio;
-import org.openrdf.sail.memory.MemoryStore;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.query.MalformedQueryException;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
+import org.eclipse.rdf4j.query.TupleQuery;
+import org.eclipse.rdf4j.query.TupleQueryResult;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryException;
+import org.eclipse.rdf4j.repository.RepositoryResult;
+import org.eclipse.rdf4j.repository.sail.SailRepository;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.RDFParseException;
+import org.eclipse.rdf4j.rio.Rio;
+import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -154,9 +154,9 @@ public class VoidStatistics implements RDFStatistics {
 			"        void:triples ?count ." +
 			"}";
 	
-	private static final ValueFactory uf = ValueFactoryImpl.getInstance();
-	private static final URI DATASET = uf.createURI(VOID2.Dataset.toString());
-	private static final URI ENDPOINT = uf.createURI(VOID2.sparqlEndpoint.toString());
+	private static final ValueFactory uf = SimpleValueFactory.getInstance();
+	private static final IRI DATASET = uf.createIRI(VOID2.Dataset.toString());
+	private static final IRI ENDPOINT = uf.createIRI(VOID2.sparqlEndpoint.toString());
 	
 	protected static final VoidStatistics singleton = new VoidStatistics();
 	
@@ -176,7 +176,7 @@ public class VoidStatistics implements RDFStatistics {
 	private VoidStatistics() {
 		this.voidRepository = new SailRepository(new MemoryStore());
 		try {
-			this.voidRepository.initialize();
+			this.voidRepository.init();
 		} catch (RepositoryException e) {
 			throw new RuntimeException("initialization of statistics repository failed", e);
 		}
@@ -251,16 +251,16 @@ public class VoidStatistics implements RDFStatistics {
 		return null;
 	}
 	
-	private List<URI> getEndpoints(URI voidURI, RepositoryConnection con) throws RepositoryException {
+	private List<IRI> getEndpoints(IRI voidIRI, RepositoryConnection con) throws RepositoryException {
 		ValueFactory uf = this.voidRepository.getValueFactory();
-		URI voidDataset = uf.createURI(VOID2.Dataset.toString());
-		URI sparqlEndpoint = uf.createURI(VOID2.sparqlEndpoint.toString());
-		List<URI> endpoints = new ArrayList<URI>();
+		IRI voidDataset = uf.createIRI(VOID2.Dataset.toString());
+		IRI sparqlEndpoint = uf.createIRI(VOID2.sparqlEndpoint.toString());
+		List<IRI> endpoints = new ArrayList<IRI>();
 		
-		for (Statement dataset : con.getStatements(null, RDF.TYPE, voidDataset, false, voidURI).asList()) {
-			for (Statement endpoint : con.getStatements(dataset.getSubject(), sparqlEndpoint, null, false, voidURI).asList()) {
+		for (Statement dataset : con.getStatements(null, RDF.TYPE, voidDataset, false, voidIRI).asList()) {
+			for (Statement endpoint : con.getStatements(dataset.getSubject(), sparqlEndpoint, null, false, voidIRI).asList()) {
 				// TODO: endpoint may be a literal
-				endpoints.add((URI) endpoint.getObject());
+				endpoints.add((IRI) endpoint.getObject());
 			}
 		}
 		return endpoints;
@@ -346,8 +346,8 @@ public class VoidStatistics implements RDFStatistics {
 		List<Graph> sources = new ArrayList<Graph>();
 		
 		ValueFactory uf = this.voidRepository.getValueFactory();
-		URI voidDataset = uf.createURI(VOID2.Dataset.toString());
-		URI sparqlEndpoint = uf.createURI(VOID2.sparqlEndpoint.toString());
+		IRI voidDataset = uf.createIRI(VOID2.Dataset.toString());
+		IRI sparqlEndpoint = uf.createIRI(VOID2.sparqlEndpoint.toString());
 		
 		try {
 			RepositoryConnection con = this.voidRepository.getConnection();
@@ -373,20 +373,20 @@ public class VoidStatistics implements RDFStatistics {
 	/**
 	 * Loads the supplied voiD description into the statistics repository.
 	 * 
-	 * @param voidURI the URI of the voiD description to load.
+	 * @param voidIRI the IRI of the voiD description to load.
 	 * @return the assigned SPARQL endpoint.
 	 */
-	public URI load(URI voidURI, URI endpoint) throws IOException {
-		if (voidURI == null)
-			throw new IllegalArgumentException("voiD URI must not be null.");
+	public IRI load(IRI voidIRI, IRI endpoint) throws IOException {
+		if (voidIRI == null)
+			throw new IllegalArgumentException("voiD IRI must not be null.");
 		
 		// initialize parser
-		RDFFormat format = Rio.getParserFormatForFileName(voidURI.stringValue());
+		RDFFormat format = Rio.getParserFormatForFileName(voidIRI.stringValue()).get();
 		if (format == null) {
-			throw new IOException("Unsupported RDF format: " + voidURI);
+			throw new IOException("Unsupported RDF format: " + voidIRI);
 		}
 
-		URL voidURL = new URL(voidURI.stringValue());  // throws IOException
+		URL voidURL = new URL(voidIRI.stringValue());  // throws IOException
 		InputStream in = voidURL.openStream();
 		try {
 			
@@ -394,20 +394,20 @@ public class VoidStatistics implements RDFStatistics {
 			try {
 				
 				// check if voiD description has already been loaded
-				List<URI> endpoints = getEndpoints(voidURI, con);
+				List<IRI> endpoints = getEndpoints(voidIRI, con);
 				if (endpoints.size() > 0) {
-					LOGGER.warn("VOID has already been loaded: " + voidURI);
+					LOGGER.warn("VOID has already been loaded: " + voidIRI);
 					return endpoints.get(0);
 				}
 				
 				// add voiD file content to repository
 				try {
-					con.add(in, voidURI.stringValue(), format, voidURI);
+					con.add(in, voidIRI.stringValue(), format, voidIRI);
 				} catch (RDFParseException e) {
-					LOGGER.error("can not parse VOID file " + voidURI + ": " + e.getMessage());
+					LOGGER.error("can not parse VOID file " + voidIRI + ": " + e.getMessage());
 					return null;
 				} catch (RepositoryException e) {
-					LOGGER.error("can not add VOID file: " + voidURI, e);
+					LOGGER.error("can not add VOID file: " + voidIRI, e);
 					return null;
 				}
 				
@@ -417,7 +417,7 @@ public class VoidStatistics implements RDFStatistics {
 				if (endpoint == null) {
 				
 					// check if this voiD description has a valid SPARQL endpoint
-					endpoints = getEndpoints(voidURI, con);
+					endpoints = getEndpoints(voidIRI, con);
 
 					if (endpoints.size() == 0)
 						LOGGER.debug("found no SPARQL endpoint in voiD file");
@@ -428,14 +428,14 @@ public class VoidStatistics implements RDFStatistics {
 				return endpoints.iterator().next();
 				} else {
 					// find dataset resource in specified context
-					RepositoryResult<Statement> result = con.getStatements(null, RDF.TYPE, DATASET, false, voidURI);
+					RepositoryResult<Statement> result = con.getStatements(null, RDF.TYPE, DATASET, false, voidIRI);
 					Resource dataset = result.next().getSubject();
 					
 					// TODO: check that there is only one dataset defined
 					
 					// remove current SPARQL endpoint and add new one
-					con.remove(dataset, ENDPOINT, null, voidURI);
-					con.add(dataset, ENDPOINT, endpoint, voidURI);
+					con.remove(dataset, ENDPOINT, null, voidIRI);
+					con.add(dataset, ENDPOINT, endpoint, voidIRI);
 					
 					LOGGER.info("set SPARQL endpoint '" + endpoint + "' for " + voidURL.getPath().replace(USER_DIR, ""));
 					

@@ -20,9 +20,9 @@
  */
 package de.uni_koblenz.west.splendid.config;
 
-import org.openrdf.model.URI;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 /**
  * RDF Schema used by the federation configuration.
@@ -31,25 +31,25 @@ import org.openrdf.model.impl.ValueFactoryImpl;
  */
 public class FederationSailSchema {
 	
-	private static final ValueFactory vf = ValueFactoryImpl.getInstance();
+	private static final ValueFactory vf = SimpleValueFactory.getInstance();
 	
 	/** The SailRepository schema namespace 
 	 * (<tt>http://west.uni-koblenz.de/config/federation/sail#</tt>). */
 	public static final String NAMESPACE = "http://west.uni-koblenz.de/config/federation/sail#";
 	
-	public static final URI MEMBER    = vf.createURI(NAMESPACE + "member");
-	public static final URI QUERY_OPT = vf.createURI(NAMESPACE + "queryOptimization");
-	public static final URI OPT_TYPE  = vf.createURI(NAMESPACE + "optimizerType");
-	public static final URI SRC_SELECTION = vf.createURI(NAMESPACE + "sourceSelection");
-	public static final URI SELECTOR_TYPE = vf.createURI(NAMESPACE + "selectorType");
-	public static final URI USE_TYPE_STATS = vf.createURI(NAMESPACE + "useTypeStats");
-	public static final URI GROUP_BY_SAMEAS = vf.createURI(NAMESPACE + "groupBySameAs");
-	public static final URI GROUP_BY_SOURCE = vf.createURI(NAMESPACE + "groupBySource");
-	public static final URI USE_BIND_JOIN = vf.createURI(NAMESPACE + "useBindJoin");
-	public static final URI USE_HASH_JOIN = vf.createURI(NAMESPACE + "useHashJoin");
-	public static final URI ESTIMATOR = vf.createURI(NAMESPACE + "cardEstimator");
-	public static final URI STATISTIC = vf.createURI(NAMESPACE + "statistic");
-	public static final URI VOID_URI  = vf.createURI(NAMESPACE + "voidDescription");
-	public static final URI EVAL_STRATEGY  = vf.createURI(NAMESPACE + "evalStrategy");
+	public static final IRI MEMBER    = vf.createIRI(NAMESPACE + "member");
+	public static final IRI QUERY_OPT = vf.createIRI(NAMESPACE + "queryOptimization");
+	public static final IRI OPT_TYPE  = vf.createIRI(NAMESPACE + "optimizerType");
+	public static final IRI SRC_SELECTION = vf.createIRI(NAMESPACE + "sourceSelection");
+	public static final IRI SELECTOR_TYPE = vf.createIRI(NAMESPACE + "selectorType");
+	public static final IRI USE_TYPE_STATS = vf.createIRI(NAMESPACE + "useTypeStats");
+	public static final IRI GROUP_BY_SAMEAS = vf.createIRI(NAMESPACE + "groupBySameAs");
+	public static final IRI GROUP_BY_SOURCE = vf.createIRI(NAMESPACE + "groupBySource");
+	public static final IRI USE_BIND_JOIN = vf.createIRI(NAMESPACE + "useBindJoin");
+	public static final IRI USE_HASH_JOIN = vf.createIRI(NAMESPACE + "useHashJoin");
+	public static final IRI ESTIMATOR = vf.createIRI(NAMESPACE + "cardEstimator");
+	public static final IRI STATISTIC = vf.createIRI(NAMESPACE + "statistic");
+	public static final IRI VOID_IRI  = vf.createIRI(NAMESPACE + "voidDescription");
+	public static final IRI EVAL_STRATEGY  = vf.createIRI(NAMESPACE + "evalStrategy");
 
 }

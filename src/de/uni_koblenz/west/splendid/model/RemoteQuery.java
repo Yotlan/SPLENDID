@@ -22,11 +22,11 @@ package de.uni_koblenz.west.splendid.model;
 
 import java.util.Set;
 
-import org.openrdf.query.algebra.QueryModelVisitor;
-import org.openrdf.query.algebra.StatementPattern;
-import org.openrdf.query.algebra.TupleExpr;
-import org.openrdf.query.algebra.UnaryTupleOperator;
-import org.openrdf.query.algebra.helpers.StatementPatternCollector;
+import org.eclipse.rdf4j.query.algebra.QueryModelVisitor;
+import org.eclipse.rdf4j.query.algebra.StatementPattern;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.query.algebra.UnaryTupleOperator;
+import org.eclipse.rdf4j.query.algebra.helpers.StatementPatternCollector;
 
 import de.uni_koblenz.west.splendid.index.Graph;
 
@@ -36,6 +36,7 @@ import de.uni_koblenz.west.splendid.index.Graph;
  * 
  * @author Olaf Goerlitz
  */
+@SuppressWarnings({"deprecation","removal"})
 public class RemoteQuery extends UnaryTupleOperator {
 	
 	public RemoteQuery(TupleExpr expr) {

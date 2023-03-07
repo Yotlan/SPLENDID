@@ -20,15 +20,15 @@
  */
 package de.uni_koblenz.west.splendid.helpers;
 
-//import org.openrdf.cursor.Cursor;
-//import org.openrdf.store.Isolation;
-//import org.openrdf.store.StoreException;
-import org.openrdf.model.Resource;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.RepositoryReadOnlyException;
-import org.openrdf.repository.base.RepositoryConnectionBase;
+//import org.eclipse.rdf4j.cursor.Cursor;
+//import org.eclipse.rdf4j.store.Isolation;
+//import org.eclipse.rdf4j.store.StoreException;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.repository.RepositoryException;
+import org.eclipse.rdf4j.repository.RepositoryReadOnlyException;
+import org.eclipse.rdf4j.repository.base.RepositoryConnectionBase;
 
 import de.uni_koblenz.west.splendid.VoidRepository;
 
@@ -81,13 +81,11 @@ public abstract class ReadOnlyRepositoryConnection extends RepositoryConnectionB
 		throw new RepositoryReadOnlyException();
 	}
 	
-	@Override
 //	public void add(Resource subject, URI predicate, Value object, Resource... contexts) throws StoreException {  // Sesame 3
 	protected void addWithoutCommit(Resource subject, URI predicate, Value object, Resource... contexts) throws RepositoryException {  // Sesame 2
 		throw new RepositoryReadOnlyException();
 	}
 	
-	@Override
 //	public void removeMatch(Resource subject, URI predicate, Value object, Resource... contexts) throws StoreException {  // Sesame 3
 	protected void removeWithoutCommit(Resource subject, URI predicate, Value object, Resource... contexts) throws RepositoryException {  // Sesame 2
 		throw new RepositoryReadOnlyException();

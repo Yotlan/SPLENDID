@@ -44,16 +44,16 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.openrdf.model.BNode;
-import org.openrdf.model.Literal;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.model.vocabulary.RDF;
-import org.openrdf.model.vocabulary.RDFS;
-import org.openrdf.rio.RDFHandlerException;
-import org.openrdf.rio.RDFWriter;
+import org.eclipse.rdf4j.model.BNode;
+import org.eclipse.rdf4j.model.Literal;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.model.vocabulary.RDFS;
+import org.eclipse.rdf4j.rio.RDFHandlerException;
+import org.eclipse.rdf4j.rio.RDFWriter;
 import org.semanticweb.yars.nx.Node;
 import org.semanticweb.yars.nx.parser.NxParser;
 
@@ -122,12 +122,12 @@ public class NXVoidGenerator {
 	
 	// --------------------------------------------------------------
 
-	private static final ValueFactory vf = ValueFactoryImpl.getInstance();
-	private static final URI DATASET = vf.createURI(VOID2.Dataset.toString());
-	private static final URI TRIPLES = vf.createURI(VOID2.triples.toString());
-	private static final URI CLASSES = vf.createURI(VOID2.classes.toString());
-	private static final URI ENDTITIES= vf.createURI(VOID2.entities.toString());
-	private static final URI PROPERTIES = vf.createURI(VOID2.properties.toString());
+	private static final ValueFactory vf = SimpleValueFactory.getInstance();
+	private static final IRI DATASET = vf.createIRI(VOID2.Dataset.toString());
+	private static final IRI TRIPLES = vf.createIRI(VOID2.triples.toString());
+	private static final IRI CLASSES = vf.createIRI(VOID2.classes.toString());
+	private static final IRI ENDTITIES= vf.createIRI(VOID2.entities.toString());
+	private static final IRI PROPERTIES = vf.createIRI(VOID2.properties.toString());
 	
 	Node lastContext = null;
 	Set<Node> contexts = new HashSet<Node>();
@@ -260,7 +260,7 @@ public class NXVoidGenerator {
 		if (context == null)
 			return;  // nothing to do
 		
-		URI dataset = vf.createURI(context.toString());
+		IRI dataset = vf.createIRI(context.toString());
 		
 		// general void information
 		writer.handleStatement(vf.createStatement(dataset, RDF.TYPE, DATASET));
@@ -271,7 +271,7 @@ public class NXVoidGenerator {
 		Collections.sort(keys);
 		for (Node n : keys) {
 			try {
-				URI predicate = vf.createURI(n.toString());
+				IRI predicate = vf.createIRI(n.toString());
 				writePredicateStatToVoid(dataset, predicate, predCount.countMap.get(pMap.get(n)), 0, 0);
 			} catch (IllegalArgumentException e) {
 				System.err.println("bad predicate: " + e.getMessage());
@@ -283,7 +283,7 @@ public class NXVoidGenerator {
 		Collections.sort(keys);
 		for (Node n : keys) {
 			try {
-				URI type = vf.createURI(n.toString());
+				IRI type = vf.createIRI(n.toString());
 				writeTypeStatToVoid(dataset, type, typeCount.countMap.get(n));
 			} catch (IllegalArgumentException e) {
 				System.err.println("bad type: " + e.getMessage());
@@ -291,8 +291,8 @@ public class NXVoidGenerator {
 			}
 		}
 		
-//		writer.handleStatement(vf.createStatement(dataset, vf.createURI(VOID2.classes.toString()), vf.createLiteral(String.valueOf(typeCountMap.size()))));
-//		writer.handleStatement(vf.createStatement(dataset, vf.createURI(VOID2.entities.toString()), vf.createLiteral(String.valueOf(entityCount))));
+//		writer.handleStatement(vf.createStatement(dataset, vf.createIRI(VOID2.classes.toString()), vf.createLiteral(String.valueOf(typeCountMap.size()))));
+//		writer.handleStatement(vf.createStatement(dataset, vf.createIRI(VOID2.entities.toString()), vf.createLiteral(String.valueOf(entityCount))));
 		
 //		System.out.println("Context [" + contextCount + "] " + context + " has " + predCount.size() + " distinct predicates, " + tripleCount + " triples.");
 		
@@ -334,30 +334,30 @@ public class NXVoidGenerator {
 	
 	// --------------------------------------------------------------
 	
-	private void writePredicateStatToVoid(URI dataset, URI predicate, long pCount, int distS, int distO) {
+	private void writePredicateStatToVoid(IRI dataset, IRI predicate, long pCount, int distS, int distO) {
 		BNode propPartition = vf.createBNode();
 		Literal count = vf.createLiteral(String.valueOf(pCount));
 		Literal distinctS  = vf.createLiteral(String.valueOf(distS));
 		Literal distinctO  = vf.createLiteral(String.valueOf(distO));
 		try {
-			writer.handleStatement(vf.createStatement(dataset, vf.createURI(VOID2.propertyPartition.toString()), propPartition));
-			writer.handleStatement(vf.createStatement(propPartition, vf.createURI(VOID2.property.toString()), predicate));
-			writer.handleStatement(vf.createStatement(propPartition, vf.createURI(VOID2.triples.toString()), count));
-			writer.handleStatement(vf.createStatement(propPartition, vf.createURI(VOID2.distinctSubjects.toString()), distinctS));
-			writer.handleStatement(vf.createStatement(propPartition, vf.createURI(VOID2.distinctObjects.toString()), distinctO));
+			writer.handleStatement(vf.createStatement(dataset, vf.createIRI(VOID2.propertyPartition.toString()), propPartition));
+			writer.handleStatement(vf.createStatement(propPartition, vf.createIRI(VOID2.property.toString()), predicate));
+			writer.handleStatement(vf.createStatement(propPartition, vf.createIRI(VOID2.triples.toString()), count));
+			writer.handleStatement(vf.createStatement(propPartition, vf.createIRI(VOID2.distinctSubjects.toString()), distinctS));
+			writer.handleStatement(vf.createStatement(propPartition, vf.createIRI(VOID2.distinctObjects.toString()), distinctO));
 		} catch (RDFHandlerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
-	private void writeTypeStatToVoid(URI dataset, Value type, long tCount) {
+	private void writeTypeStatToVoid(IRI dataset, Value type, long tCount) {
 		BNode classPartition = vf.createBNode();
 		Literal count = vf.createLiteral(String.valueOf(tCount));
 		try {
-			writer.handleStatement(vf.createStatement(dataset, vf.createURI(VOID2.classPartition.toString()), classPartition));
-			writer.handleStatement(vf.createStatement(classPartition, vf.createURI(VOID2.clazz.toString()), type));
-			writer.handleStatement(vf.createStatement(classPartition, vf.createURI(VOID2.entities.toString()), count));
+			writer.handleStatement(vf.createStatement(dataset, vf.createIRI(VOID2.classPartition.toString()), classPartition));
+			writer.handleStatement(vf.createStatement(classPartition, vf.createIRI(VOID2.clazz.toString()), type));
+			writer.handleStatement(vf.createStatement(classPartition, vf.createIRI(VOID2.entities.toString()), count));
 		} catch (RDFHandlerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

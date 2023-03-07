@@ -7,10 +7,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.algebra.TupleExpr;
-import org.openrdf.query.algebra.helpers.StatementPatternCollector;
-import org.openrdf.query.parser.sparql.SPARQLParser;
+import org.eclipse.rdf4j.query.MalformedQueryException;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.query.algebra.helpers.StatementPatternCollector;
+import org.eclipse.rdf4j.query.parser.sparql.SPARQLParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +33,7 @@ public class SourceSelectionEval {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(SourceSelectionEval.class);
 	
-	private static final String CONFIG_FILE = "setup/fed-test.properties";
+	private static final String CONFIG_FILE = "config.properties";
 	
 	private SourceSelector finder;
 	private SubQueryBuilder queryBuilder;
@@ -48,10 +48,10 @@ public class SourceSelectionEval {
 		this.output = config.getResultStream();
 	}
 	
-	public void testQueries() {
+	public void testQueries(Configuration config) {
 		
 		// table header
-		output.println("#query\tsources\treqSent\tpatSent");
+		output.println("query;triples;#sources;sources");
 		
 		while (this.queries.hasNext()) {
 			Query query = this.queries.next();
@@ -65,7 +65,7 @@ public class SourceSelectionEval {
 			}
 			
 			// group all triple patterns by assigned data source
-			List<MappedStatementPattern> mappedPatterns = finder.mapSources(StatementPatternCollector.process(expr));
+			List<MappedStatementPattern> mappedPatterns = finder.mapSources(StatementPatternCollector.process(expr), config);
 			List<List<MappedStatementPattern>> patterns = this.queryBuilder.getGroups(mappedPatterns);
 
 			Set<Graph> selectedSources = new HashSet<Graph>();
@@ -77,9 +77,8 @@ public class SourceSelectionEval {
 				selectedSources.addAll(sourceSet);
 				queriesToSend += sourceSet.size();
 				patternToSend += sourceSet.size() * patternCount;
+				output.println(query.getName() + ";" + pList + ";" + pList.get(0).getSources().size() + ";" + pList.get(0).getSources().toString());
 			}
-			
-			output.println(query.getName() + "\t" + selectedSources.size() + "\t" + queriesToSend + "\t" + patternToSend);
 		}
 		output.close();
 	}
@@ -98,7 +97,7 @@ public class SourceSelectionEval {
 		try {
 			Configuration config = Configuration.load(configFile);
 			SourceSelectionEval eval = new SourceSelectionEval(config);
-			eval.testQueries();
+			eval.testQueries(config);
 		} catch (IOException e) {
 			LOGGER.error("cannot load test config: " + e.getMessage());
 		} catch (ConfigurationException e) {

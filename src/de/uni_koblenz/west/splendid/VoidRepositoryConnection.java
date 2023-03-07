@@ -20,32 +20,32 @@
  */
 package de.uni_koblenz.west.splendid;
 
-//import org.openrdf.model.LiteralFactory;
-import org.openrdf.model.Namespace;
-import org.openrdf.model.Resource;
-import org.openrdf.model.Statement;
-import org.openrdf.model.URI;
-//import org.openrdf.model.URIFactory;
-import org.openrdf.model.Value;
-import org.openrdf.model.ValueFactory;
-//import org.openrdf.model.impl.BNodeFactoryImpl;
-import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.query.BooleanQuery;
-import org.openrdf.query.GraphQuery;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.Query;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.TupleQuery;
-import org.openrdf.query.UnsupportedQueryLanguageException;
-import org.openrdf.query.Update;
-//import org.openrdf.result.ContextResult;
-//import org.openrdf.result.ModelResult;
-//import org.openrdf.result.NamespaceResult;
-import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.RepositoryResult;
-import org.openrdf.rio.RDFHandler;
-import org.openrdf.rio.RDFHandlerException;
-//import org.openrdf.store.StoreException;
+//import org.eclipse.rdf4j.model.LiteralFactory;
+import org.eclipse.rdf4j.model.Namespace;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.IRI;
+//import org.eclipse.rdf4j.model.IRIFactory;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.ValueFactory;
+//import org.eclipse.rdf4j.model.impl.BNodeFactoryImpl;
+import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.query.BooleanQuery;
+import org.eclipse.rdf4j.query.GraphQuery;
+import org.eclipse.rdf4j.query.MalformedQueryException;
+import org.eclipse.rdf4j.query.Query;
+import org.eclipse.rdf4j.query.QueryLanguage;
+import org.eclipse.rdf4j.query.TupleQuery;
+import org.eclipse.rdf4j.query.UnsupportedQueryLanguageException;
+import org.eclipse.rdf4j.query.Update;
+//import org.eclipse.rdf4j.result.ContextResult;
+//import org.eclipse.rdf4j.result.ModelResult;
+//import org.eclipse.rdf4j.result.NamespaceResult;
+import org.eclipse.rdf4j.repository.RepositoryException;
+import org.eclipse.rdf4j.repository.RepositoryResult;
+import org.eclipse.rdf4j.rio.RDFHandler;
+import org.eclipse.rdf4j.rio.RDFHandlerException;
+//import org.eclipse.rdf4j.store.StoreException;
 
 import de.uni_koblenz.west.splendid.helpers.QueryExecutor;
 import de.uni_koblenz.west.splendid.helpers.ReadOnlyRepositoryConnection;
@@ -72,7 +72,7 @@ public class VoidRepositoryConnection extends ReadOnlyRepositoryConnection {
 		
 		// reuse repository specific factories for better performance
 //		BNodeFactoryImpl bf = new BNodeFactoryImpl();
-//		URIFactory uf = repository.getURIFactory();
+//		IRIFactory uf = repository.getIRIFactory();
 //		LiteralFactory lf = repository.getLiteralFactory();
 //		this.vf = new ValueFactoryImpl(bf, uf, lf);
 		this.vf = new ValueFactoryImpl();
@@ -80,22 +80,46 @@ public class VoidRepositoryConnection extends ReadOnlyRepositoryConnection {
 	
 	// -------------------------------------------------------------------------
 	
+	//Dummy
 	@Override
-	public BooleanQuery prepareBooleanQuery(QueryLanguage ql, String query, String baseURI)
+	public void removeWithoutCommit(Resource subject,IRI predicate,Value object,Resource... contexts) throws RepositoryException {
+		throw new UnsupportedOperationException("not yet implemented");
+	}
+
+	//Dummy
+	@Override
+	public void addWithoutCommit(Resource subject,IRI predicate,Value object,Resource... contexts) throws RepositoryException {
+		throw new UnsupportedOperationException("not yet implemented");
+	}
+
+	//Dummy
+	@Override
+	public void begin() throws RepositoryException {
+		throw new UnsupportedOperationException("not yet implemented");
+	}
+
+	//Dummy
+	@Override
+	public boolean isActive() throws RepositoryException {
+		throw new UnsupportedOperationException("not yet implemented");
+	}
+
+	@Override
+	public BooleanQuery prepareBooleanQuery(QueryLanguage ql, String query, String baseIRI)
 //			throws StoreException, MalformedQueryException {
 			throws RepositoryException, MalformedQueryException {
 		throw new UnsupportedOperationException("not yet implemented");
 	}
 
 	@Override
-	public GraphQuery prepareGraphQuery(QueryLanguage ql, String query, String baseURI)
+	public GraphQuery prepareGraphQuery(QueryLanguage ql, String query, String baseIRI)
 //			throws StoreException, MalformedQueryException {
 			throws RepositoryException, MalformedQueryException {
 		throw new UnsupportedOperationException("not yet implemented");
 	}
 
 	@Override
-	public Query prepareQuery(QueryLanguage ql, String query, String baseURI)
+	public Query prepareQuery(QueryLanguage ql, String query, String baseIRI)
 //			throws StoreException, MalformedQueryException {
 			throws RepositoryException, MalformedQueryException {
 		throw new UnsupportedOperationException("not yet implemented");
@@ -108,10 +132,10 @@ public class VoidRepositoryConnection extends ReadOnlyRepositoryConnection {
 	 *        The query language in which the query is formulated.
 	 * @param query
 	 *        The query string.
-	 * @param baseURI
-	 *        The base URI to resolve any relative URIs that are in the query
+	 * @param baseIRI
+	 *        The base IRI to resolve any relative IRIs that are in the query
 	 *        against, can be <tt>null</tt> if the query does not contain any
-	 *        relative URIs.
+	 *        relative IRIs.
 	 * @throws IllegalArgumentException
 	 *         If the supplied query is not a tuple query.
 	 * @throws MalformedQueryException
@@ -120,7 +144,7 @@ public class VoidRepositoryConnection extends ReadOnlyRepositoryConnection {
 	 *         If the supplied query language is not supported.
 	 */
 	@Override
-	public TupleQuery prepareTupleQuery(QueryLanguage ql, String query, String baseURI)
+	public TupleQuery prepareTupleQuery(QueryLanguage ql, String query, String baseIRI)
 //			throws StoreException, MalformedQueryException {
 			throws RepositoryException, MalformedQueryException {
 		
@@ -128,15 +152,14 @@ public class VoidRepositoryConnection extends ReadOnlyRepositoryConnection {
 			throw new UnsupportedQueryLanguageException("only SPARQL supported");
 		if (query == null)
 			throw new IllegalArgumentException("query is null");
-		if (baseURI != null)
-			throw new IllegalArgumentException("base/relative URIs not allowed");
+		if (baseIRI != null)
+			throw new IllegalArgumentException("base/relative IRIs not allowed");
 		
 		return QueryExecutor.prepareTupleQuery(query, this.endpoint, null);
 	}
 
-	@Override
-//	public <H extends RDFHandler> H exportMatch(Resource subj, URI pred, Value obj, boolean includeInferred, H handler, Resource... contexts) throws StoreException, RDFHandlerException {
-	public void exportStatements(Resource subj, URI pred, Value obj, boolean includeInferred, RDFHandler handler, Resource... contexts) throws RepositoryException, RDFHandlerException {
+//	public <H extends RDFHandler> H exportMatch(Resource subj, IRI pred, Value obj, boolean includeInferred, H handler, Resource... contexts) throws StoreException, RDFHandlerException {
+	public void exportStatements(Resource subj, IRI pred, Value obj, boolean includeInferred, RDFHandler handler, Resource... contexts) throws RepositoryException, RDFHandlerException {
 		throw new UnsupportedOperationException("Not yet implemented");
 	}
 	
@@ -159,13 +182,13 @@ public class VoidRepositoryConnection extends ReadOnlyRepositoryConnection {
 	}
 	
 	@Override
-//	public ModelResult match(Resource subj, URI pred, Value obj, boolean includeInferred, Resource... contexts) throws StoreException {
-	public RepositoryResult<Statement> getStatements(Resource subj, URI pred, Value obj, boolean includeInferred, Resource... contexts) throws RepositoryException {
+//	public ModelResult match(Resource subj, IRI pred, Value obj, boolean includeInferred, Resource... contexts) throws StoreException {
+	public RepositoryResult<Statement> getStatements(Resource subj, IRI pred, Value obj, boolean includeInferred, Resource... contexts) throws RepositoryException {
 		throw new UnsupportedOperationException("Not yet implemented");
 	}
 	
 	@Override
-	public Update prepareUpdate(QueryLanguage ql, String update, String baseURI)
+	public Update prepareUpdate(QueryLanguage ql, String update, String baseIRI)
 			throws RepositoryException, MalformedQueryException {
 		throw new UnsupportedOperationException("SPARQL update is not supported");
 	}
@@ -205,13 +228,13 @@ public class VoidRepositoryConnection extends ReadOnlyRepositoryConnection {
 //	}
 //
 //	@Override
-//	public ModelResult match(Resource subj, URI pred, Value obj, boolean includeInferred, Resource... contexts)
+//	public ModelResult match(Resource subj, IRI pred, Value obj, boolean includeInferred, Resource... contexts)
 //			throws StoreException {
 //		throw new UnsupportedOperationException("not yet implemented");
 //	}
 //
 //	@Override
-//	public long sizeMatch(Resource subj, URI pred, Value obj, boolean includeInferred, Resource... contexts)
+//	public long sizeMatch(Resource subj, IRI pred, Value obj, boolean includeInferred, Resource... contexts)
 //			throws StoreException {
 //		throw new UnsupportedOperationException("not yet implemented");
 //	}

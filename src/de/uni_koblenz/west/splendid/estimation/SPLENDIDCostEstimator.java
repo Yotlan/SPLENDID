@@ -20,8 +20,8 @@
  */
 package de.uni_koblenz.west.splendid.estimation;
 
-import org.openrdf.query.algebra.Join;
-import org.openrdf.query.algebra.UnaryTupleOperator;
+import org.eclipse.rdf4j.query.algebra.Join;
+import org.eclipse.rdf4j.query.algebra.UnaryTupleOperator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

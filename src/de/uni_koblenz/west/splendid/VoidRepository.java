@@ -23,12 +23,12 @@ package de.uni_koblenz.west.splendid;
 import java.io.File;
 import java.io.IOException;
 
-import org.openrdf.model.URI;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,22 +45,28 @@ public class VoidRepository implements Repository {
 	private static final Logger LOGGER = LoggerFactory.getLogger(VoidRepository.class);
 	
 	protected final ValueFactory vf = new ValueFactoryImpl();
-	protected URI endpoint;
-	protected final URI voidURI;
+	protected IRI endpoint;
+	protected final IRI voidIRI;
 	
 	protected boolean initialized = false;
 	
 	public VoidRepository(VoidRepositoryConfig config) {
 		this.endpoint = config.getEndpoint();
-		this.voidURI = config.getVoidURI();
+		this.voidIRI = config.getVoidIRI();
 	}
 	
-	public URI getEndpoint() {
+	public IRI getEndpoint() {
 		return this.endpoint;
 	}
 
 	// --------------------------------------------------------------
 	
+	// Dummy
+	@Override
+	public boolean isInitialized(){
+		return this.initialized;
+	}
+
 	@Override
 	public void setDataDir(File dataDir) {
 		throw new UnsupportedOperationException("SPARQL endpoint repository has no data dir");
@@ -90,9 +96,9 @@ public class VoidRepository implements Repository {
 		}
 		
 		try {
-			this.endpoint = VoidStatistics.getInstance().load(this.voidURI, this.endpoint);
+			this.endpoint = VoidStatistics.getInstance().load(this.voidIRI, this.endpoint);
 		} catch (IOException e) {
-			throw new RepositoryException("can not read voiD description: " + this.voidURI + e.getMessage(), e);
+			throw new RepositoryException("can not read voiD description: " + this.voidIRI + e.getMessage(), e);
 		}
 		
 		this.initialized = true;

@@ -20,14 +20,14 @@
  */
 package de.uni_koblenz.west.splendid.helpers;
 
-import org.openrdf.model.Resource;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.sail.SailException;
-import org.openrdf.sail.SailReadOnlyException;
-import org.openrdf.sail.helpers.SailBase;
-import org.openrdf.sail.helpers.SailConnectionBase;
-//import org.openrdf.store.StoreException;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.sail.SailException;
+import org.eclipse.rdf4j.sail.SailReadOnlyException;
+import org.eclipse.rdf4j.sail.helpers.SailBase;
+import org.eclipse.rdf4j.sail.helpers.SailConnectionBase;
+//import org.eclipse.rdf4j.store.StoreException;
 
 /**
  * Prevents data updates by overriding all modifying methods
@@ -43,31 +43,26 @@ public abstract class ReadOnlySailConnection extends SailConnectionBase {
 		super(sailBase);
 	}
 	
-	@Override
-//	public void addStatement(Resource subj, URI pred, Value obj, Resource... contexts) throws StoreException {
-	protected void addStatementInternal(Resource subj, URI pred, Value obj, Resource... contexts) throws SailException {
+//	public void addStatement(Resource subj, IRI pred, Value obj, Resource... contexts) throws StoreException {
+	protected void addStatementInternal(Resource subj, IRI pred, Value obj, Resource... contexts) throws SailException {
 		throw new SailReadOnlyException("Data updates are not supported.");
 	}
 
-	@Override
 //	public void clearNamespaces() throws StoreException {
 	protected void clearNamespacesInternal() throws SailException {
 		throw new SailReadOnlyException("Data updates are not supported.");
 	}
 
-	@Override
 //	public void removeNamespace(String prefix) throws StoreException {
 	protected void removeNamespaceInternal(String prefix) throws SailException {
 		throw new SailReadOnlyException("Data updates are not supported.");
 	}
 
-	@Override
-//	public void removeStatements(Resource subj, URI pred, Value obj, Resource... context) throws StoreException {
-	protected void removeStatementsInternal(Resource subj, URI pred, Value obj, Resource... contexts) throws SailException {
+//	public void removeStatements(Resource subj, IRI pred, Value obj, Resource... context) throws StoreException {
+	protected void removeStatementsInternal(Resource subj, IRI pred, Value obj, Resource... contexts) throws SailException {
 		throw new SailReadOnlyException("Data updates are not supported.");
 	}
 
-	@Override
 //	public void setNamespace(String prefix, String name) throws StoreException {
 	protected void setNamespaceInternal(String prefix, String name) throws SailException {
 		throw new SailReadOnlyException("Data updates are not supported.");
@@ -75,22 +70,18 @@ public abstract class ReadOnlySailConnection extends SailConnectionBase {
 
 	// Sesame 2 only:
 	
-	@Override
 	protected void clearInternal(Resource... contexts) throws SailException {
 		throw new SailReadOnlyException("Data updates are not supported.");
 	}
 	
-	@Override
 	protected void commitInternal() throws SailException {
 		throw new SailReadOnlyException("Data updates are not supported.");
 	}
 	
-	@Override
 	protected void rollbackInternal() throws SailException {
 		throw new SailReadOnlyException("Data updates are not supported.");
 	}
 	
-	@Override
 	protected void startTransactionInternal() throws SailException {
 		throw new SailReadOnlyException("Data updates are not supported.");
 	}

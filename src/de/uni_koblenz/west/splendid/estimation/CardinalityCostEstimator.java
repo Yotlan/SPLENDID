@@ -20,8 +20,8 @@
  */
 package de.uni_koblenz.west.splendid.estimation;
 
-import org.openrdf.query.algebra.QueryModelNode;
-import org.openrdf.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.query.algebra.QueryModelNode;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
 
 /**
  * @author Olaf Goerlitz

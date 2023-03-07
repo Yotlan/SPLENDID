@@ -23,17 +23,18 @@ package de.uni_koblenz.west.splendid.config;
 import static de.uni_koblenz.west.splendid.config.FederationSailSchema.SELECTOR_TYPE;
 import static de.uni_koblenz.west.splendid.config.FederationSailSchema.USE_TYPE_STATS;
 
-import org.openrdf.model.Graph;
-import org.openrdf.model.Resource;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.sail.config.SailConfigException;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.sail.config.SailConfigException;
 
 /**
  * Configuration settings for the sources selector.
  * 
  * @author Olaf Goerlitz
  */
+@SuppressWarnings({"deprecation","removal","dep-ann"})
 public class SourceSelectorConfig extends AbstractSailConfig {
 	
 	/** @deprecated */
@@ -47,7 +48,7 @@ public class SourceSelectorConfig extends AbstractSailConfig {
 		this.setType(type);
 	}
 	
-	public static SourceSelectorConfig create(Graph model, Resource implNode) throws SailConfigException {
+	public static SourceSelectorConfig create(Model model, Resource implNode) throws SailConfigException {
 		SourceSelectorConfig config = new SourceSelectorConfig();
 		config.parse(model, implNode);
 		return config;
@@ -59,7 +60,7 @@ public class SourceSelectorConfig extends AbstractSailConfig {
 	}
 	
 	@Override
-	public Resource export(Graph model) {
+	public Resource export(Model model) {
 		ValueFactory vf = ValueFactoryImpl.getInstance();
 		
 		Resource self = super.export(model);
@@ -69,7 +70,7 @@ public class SourceSelectorConfig extends AbstractSailConfig {
 	}
 
 	@Override
-	public void parse(Graph model, Resource implNode) throws SailConfigException {
+	public void parse(Model model, Resource implNode) throws SailConfigException {
 		super.parse(model, implNode);
 		
 		this.useTypeStats = getObjectBoolean(model, implNode, USE_TYPE_STATS, true);

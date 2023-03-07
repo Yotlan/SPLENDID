@@ -25,8 +25,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.openrdf.query.algebra.StatementPattern;
-import org.openrdf.sail.SailException;
+import org.eclipse.rdf4j.query.algebra.StatementPattern;
+import org.eclipse.rdf4j.sail.SailException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +34,7 @@ import de.uni_koblenz.west.splendid.helpers.OperatorTreePrinter;
 import de.uni_koblenz.west.splendid.helpers.QueryExecutor;
 import de.uni_koblenz.west.splendid.index.Graph;
 import de.uni_koblenz.west.splendid.statistics.VoidStatistics;
+import de.uni_koblenz.west.splendid.test.config.Configuration;
 
 /**
  * A source selector which contacts SPARQL Endpoints asking them whether
@@ -48,8 +49,8 @@ public class AskSelector extends SourceSelectorBase {
 	private List<Graph> sourceList;
 	
 	@Override
-	public void initialize() throws SailException {
-		super.initialize();
+	public void init() throws SailException {
+		super.init();
 		this.sourceList = ((VoidStatistics) stats).getEndpoints();
 		
 		if (LOGGER.isDebugEnabled())
@@ -57,11 +58,11 @@ public class AskSelector extends SourceSelectorBase {
 	}
 
 	@Override
-	protected Set<Graph> getSources(StatementPattern pattern) {
-		return getSources(pattern, this.sourceList);
+	protected Set<Graph> getSources(StatementPattern pattern, Configuration config) {
+		return getSources(pattern, this.sourceList, config);
 	}
 	
-	protected Set<Graph> getSources(StatementPattern pattern, Collection<Graph> sources) {
+	protected Set<Graph> getSources(StatementPattern pattern, Collection<Graph> sources, Configuration config) {
 		Set<Graph> selectedSources = new HashSet<Graph>();
 		
 		if (LOGGER.isDebugEnabled())
@@ -71,7 +72,7 @@ public class AskSelector extends SourceSelectorBase {
 		
 		// ask each source for current pattern
 		for (Graph source : sources) {
-			if (QueryExecutor.ask(source.toString(), sparqlPattern))
+			if (QueryExecutor.ask(source.toString(), sparqlPattern, config))
 				selectedSources.add(source);
 		}
 		return selectedSources;

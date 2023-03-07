@@ -20,11 +20,11 @@
  */
 package de.uni_koblenz.west.splendid.config;
 
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.config.RepositoryConfigException;
-import org.openrdf.repository.config.RepositoryFactory;
-import org.openrdf.repository.config.RepositoryImplConfig;
-//import org.openrdf.store.StoreConfigException;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.config.RepositoryConfigException;
+import org.eclipse.rdf4j.repository.config.RepositoryFactory;
+import org.eclipse.rdf4j.repository.config.RepositoryImplConfig;
+//import org.eclipse.rdf4j.store.StoreConfigException;
 
 import de.uni_koblenz.west.splendid.VoidRepository;
 
@@ -33,7 +33,7 @@ import de.uni_koblenz.west.splendid.VoidRepository;
  * based on the supplied configuration data.
  * 
  * ATTENTION: This factory must be published with full package name in
- *            META-INF/services/org.openrdf.repository.config.RepositoryFactory
+ *            META-INF/services/org.eclipse.rdf4j.repository.config.RepositoryFactory
  * 
  * @author Olaf Goerlitz
  */

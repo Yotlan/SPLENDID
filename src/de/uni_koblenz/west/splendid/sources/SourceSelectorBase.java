@@ -24,8 +24,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.openrdf.query.algebra.StatementPattern;
-import org.openrdf.sail.SailException;
+import org.eclipse.rdf4j.query.algebra.StatementPattern;
+import org.eclipse.rdf4j.sail.SailException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +33,8 @@ import de.uni_koblenz.west.splendid.helpers.OperatorTreePrinter;
 import de.uni_koblenz.west.splendid.index.Graph;
 import de.uni_koblenz.west.splendid.model.MappedStatementPattern;
 import de.uni_koblenz.west.splendid.statistics.RDFStatistics;
+
+import de.uni_koblenz.west.splendid.test.config.Configuration;
 
 /**
  * Basic behavior of a source selector.
@@ -53,12 +55,12 @@ public abstract class SourceSelectorBase implements SourceSelector {
 	 * @param pattern the statement pattern to process.
 	 * @return a set of sources.
 	 */
-	protected abstract Set<Graph> getSources(StatementPattern pattern);
+	protected abstract Set<Graph> getSources(StatementPattern pattern, Configuration config);
 	
 	// --------------------------------------------------------------
 	
 	@Override
-	public void initialize() throws SailException {
+	public void init() throws SailException {
 		if (this.stats == null)
 			throw new SailException("need statistics for source selection");
 	}
@@ -75,7 +77,7 @@ public abstract class SourceSelectorBase implements SourceSelector {
 	 * @param patterns the list of patterns to be processed.
 	 * @return the list of patterns with data source mappings.
 	 */
-	public List<MappedStatementPattern> mapSources(List<StatementPattern> patterns) {
+	public List<MappedStatementPattern> mapSources(List<StatementPattern> patterns, Configuration config) {
 		
 		List<MappedStatementPattern> pMap = new ArrayList<MappedStatementPattern>();
 		
@@ -87,7 +89,7 @@ public abstract class SourceSelectorBase implements SourceSelector {
 			
 			// get sources for the first pattern in group (with same constants)
 			StatementPattern firstPattern = patternGroup.get(0);
-			Set<Graph> sources = getSources(firstPattern);
+			Set<Graph> sources = getSources(firstPattern, config);
 			
 			// print warning if no sources were found
 			if (sources.size() == 0) {

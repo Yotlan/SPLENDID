@@ -22,10 +22,12 @@ package de.uni_koblenz.west.splendid.sources;
 
 import java.util.Set;
 
-import org.openrdf.model.Value;
-import org.openrdf.query.algebra.StatementPattern;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.query.algebra.StatementPattern;
 
 import de.uni_koblenz.west.splendid.index.Graph;
+
+import de.uni_koblenz.west.splendid.test.config.Configuration;
 
 /**
  * Source selection for the supplied basic graph patterns.
@@ -53,7 +55,7 @@ public class IndexSelector extends SourceSelectorBase {
 	 * @return the set of source which can contribute results for the pattern.
 	 */
 	@Override
-	protected Set<Graph> getSources(StatementPattern pattern) {
+	protected Set<Graph> getSources(StatementPattern pattern, Configuration config) {
 		Value s = pattern.getSubjectVar().getValue();
 		Value p = pattern.getPredicateVar().getValue();
 		Value o = pattern.getObjectVar().getValue();

@@ -20,9 +20,9 @@
  */
 package de.uni_koblenz.west.splendid.config;
 
-import org.openrdf.model.URI;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
 
 import de.uni_koblenz.west.splendid.VoidRepository;
 
@@ -43,6 +43,6 @@ public class VoidRepositorySchema {
 	public static final String NAMESPACE = "http://rdfs.org/ns/void#";
 
 	/** <tt>http://rdfs.org/ns/void#sparqlEndpoint</tt> */
-	public static final URI ENDPOINT = vf.createURI(NAMESPACE, "sparqlEndpoint");
+	public static final IRI ENDPOINT = vf.createIRI(NAMESPACE, "sparqlEndpoint");
 	
 }

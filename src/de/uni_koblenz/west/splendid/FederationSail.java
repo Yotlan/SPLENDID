@@ -23,16 +23,16 @@ package de.uni_koblenz.west.splendid;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.query.algebra.evaluation.EvaluationStrategy;
-import org.openrdf.query.algebra.evaluation.QueryOptimizer;
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryException;
-import org.openrdf.sail.SailConnection;
-import org.openrdf.sail.SailException;
-import org.openrdf.sail.config.SailConfigException;
-import org.openrdf.sail.helpers.SailBase;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.query.algebra.evaluation.EvaluationStrategy;
+import org.eclipse.rdf4j.query.algebra.evaluation.QueryOptimizer;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryException;
+import org.eclipse.rdf4j.sail.SailConnection;
+import org.eclipse.rdf4j.sail.SailException;
+import org.eclipse.rdf4j.sail.config.SailConfigException;
+import org.eclipse.rdf4j.sail.helpers.SailBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +50,7 @@ import de.uni_koblenz.west.splendid.statistics.VoidStatistics;
  * The implementation is adapted from Sesame's {@link Federation} Sail.
  * 
  * @author Olaf Goerlitz
- * @see org.openrdf.sail.federation.Federation
+ * @see org.eclipse.rdf4j.sail.federation.Federation
  */
 public class FederationSail extends SailBase {
 	
@@ -130,14 +130,14 @@ public class FederationSail extends SailBase {
 	 *         If the Sail could not be initialized.
 	 */
 	@Override
-	public void initialize() throws SailException {
+	public void init() throws SailException {
 		
 		if (initialized) {
 			LOGGER.info("Federation Sail is already initialized");
 			return;
 		}
 		
-		super.initialize();  // only Sesame 2 needs to initialize super class
+		super.init();  // only Sesame 2 needs to initialize super class
 		
 //		if (this.evalStrategy == null)
 //			throw new SailException("Sail evaluation strategy has not been initialized");
@@ -145,7 +145,7 @@ public class FederationSail extends SailBase {
 		// initialize all members
 		for (Repository rep : this.members) {
 			try {
-				rep.initialize();
+				rep.init();
 			} catch (RepositoryException e) {
 				throw new SailException("can not initialize repository: " + e.getMessage(), e);
 			} catch (IllegalStateException e) {
@@ -156,7 +156,7 @@ public class FederationSail extends SailBase {
 		// initialize statistics and source selector
 		VoidStatistics stats = VoidStatistics.getInstance();
 		this.selector.setStatistics(stats);
-		this.selector.initialize();
+		this.selector.init();
 		
 		// initialize evaluation strategy
 		if (this.evalStrategy == null)
@@ -209,14 +209,12 @@ public class FederationSail extends SailBase {
 
 	// SESAME 2 ================================================================
 	
-	private final ValueFactory vf = new ValueFactoryImpl();
+	private final ValueFactory vf = SimpleValueFactory.getInstance();
 	
-	@Override
 	public ValueFactory getValueFactory() {
 		return vf;
 	}
 
-	@Override
 	public boolean isWritable() throws SailException {
 		return false;
 	}

@@ -20,22 +20,22 @@
  */
 package de.uni_koblenz.west.splendid.config;
 
-import static de.uni_koblenz.west.splendid.config.FederationSailSchema.VOID_URI;
+import static de.uni_koblenz.west.splendid.config.FederationSailSchema.VOID_IRI;
 import static de.uni_koblenz.west.splendid.config.VoidRepositorySchema.ENDPOINT;
 
 import java.util.Iterator;
 
-//import org.openrdf.model.Model;
-//import org.openrdf.model.util.ModelException;
-//import org.openrdf.store.StoreConfigException;
-import org.openrdf.model.Graph;
-import org.openrdf.model.Resource;
-import org.openrdf.model.Statement;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.repository.config.RepositoryConfigException;
-import org.openrdf.repository.config.RepositoryImplConfigBase;
-import org.openrdf.sail.config.SailConfigException;
+//import org.eclipse.rdf4j.model.Model;
+//import org.eclipse.rdf4j.model.util.ModelException;
+//import org.eclipse.rdf4j.store.StoreConfigException;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.repository.config.RepositoryConfigException;
+import org.eclipse.rdf4j.repository.config.RepositoryImplConfigBase;
+import org.eclipse.rdf4j.sail.config.SailConfigException;
 
 /**
  * Configuration details for a void repository.
@@ -44,16 +44,16 @@ import org.openrdf.sail.config.SailConfigException;
  */
 public class VoidRepositoryConfig extends RepositoryImplConfigBase {
 	
-	private URI voidUri;
-	private URI endpoint;
+	private IRI voidIRI;
+	private IRI endpoint;
 	
 	/**
 	 * Returns the location of the VOID file.
 	 * 
 	 * @return the location of the VOID file or null if it is not set.
 	 */
-	public URI getVoidURI() {
-		return this.voidUri;
+	public IRI getVoidIRI() {
+		return this.voidIRI;
 	}
 	
 	/**
@@ -61,7 +61,7 @@ public class VoidRepositoryConfig extends RepositoryImplConfigBase {
 	 * 
 	 * @return the location of the SPARQL endpoint or null if it is not set.
 	 */
-	public URI getEndpoint() {
+	public IRI getEndpoint() {
 		return this.endpoint;
 	}
 
@@ -75,10 +75,10 @@ public class VoidRepositoryConfig extends RepositoryImplConfigBase {
 	 */
 	@Override
 //	public Resource export(Model model) { // Sesame 3
-	public Resource export(Graph model) { // Sesame 2
+	public Resource export(Model model) { // Sesame 2
 		Resource implNode = super.export(model);
 
-		model.add(implNode, VOID_URI, this.voidUri);
+		model.add(implNode, VOID_IRI, this.voidIRI);
 		
 		if (this.endpoint != null)
 			model.add(implNode, ENDPOINT, this.endpoint);
@@ -94,15 +94,15 @@ public class VoidRepositoryConfig extends RepositoryImplConfigBase {
 	 */
 	@Override
 //	public void parse(Model model, Resource implNode) throws StoreConfigException { // Sesame 3
-	public void parse(Graph model, Resource implNode) throws RepositoryConfigException { // Sesame 2
+	public void parse(Model model, Resource implNode) throws RepositoryConfigException { // Sesame 2
 		super.parse(model, implNode);
 		
-		this.voidUri = getObjectURI(model, implNode, VOID_URI);
-		if (this.voidUri == null)
-//			throw new StoreConfigException("VoidRepository requires: " + VOID_URI);  // Sesame 3
-			throw new RepositoryConfigException("VoidRepository requires: " + VOID_URI);
+		this.voidIRI = getObjectIRI(model, implNode, VOID_IRI);
+		if (this.voidIRI == null)
+//			throw new StoreConfigException("VoidRepository requires: " + VOID_IRI);  // Sesame 3
+			throw new RepositoryConfigException("VoidRepository requires: " + VOID_IRI);
 		
-		this.endpoint = getObjectURI(model, implNode, ENDPOINT);
+		this.endpoint = getObjectIRI(model, implNode, ENDPOINT);
 		
 	}
 
@@ -123,16 +123,16 @@ public class VoidRepositoryConfig extends RepositoryImplConfigBase {
 //	}
 	
 	/**
-	 * Returns the object URI of the setting with the specified property.
+	 * Returns the object IRI of the setting with the specified property.
 	 * 
 	 * @param config the configuration settings.
 	 * @param subject the subject (sub context) of the configuration setting.
 	 * @param property the configuration property.
-	 * @return the URI value of the desired property setting or null.
-	 * @throws SailConfigException if there is no (single) URI to return.
+	 * @return the IRI value of the desired property setting or null.
+	 * @throws SailConfigException if there is no (single) IRI to return.
 	 */
-	protected URI getObjectURI(Graph config, Resource subject, URI property) throws RepositoryConfigException {
-		Iterator<Statement> objects = config.match(subject, property, null);
+	protected IRI getObjectIRI(Model config, Resource subject, IRI property) throws RepositoryConfigException {
+		Iterator<Statement> objects = config.filter(subject, property, null).iterator();
 		if (!objects.hasNext())
 			return null;
 //			throw new RepositoryConfigException("found no settings for property " + property);
@@ -140,10 +140,10 @@ public class VoidRepositoryConfig extends RepositoryImplConfigBase {
 		if (objects.hasNext())
 			throw new RepositoryConfigException("found multiple settings for property " + property);
 		Value object = st.getObject();
-		if (object instanceof URI)
-			return (URI) object;
+		if (object instanceof IRI)
+			return (IRI) object;
 		else
-			throw new RepositoryConfigException("property value is not a URI: " + property + " " + object); 
+			throw new RepositoryConfigException("property value is not a IRI: " + property + " " + object); 
 	}
 
 }

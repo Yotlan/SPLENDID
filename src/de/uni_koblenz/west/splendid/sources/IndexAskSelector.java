@@ -22,10 +22,11 @@ package de.uni_koblenz.west.splendid.sources;
 
 import java.util.Set;
 
-import org.openrdf.query.algebra.StatementPattern;
+import org.eclipse.rdf4j.query.algebra.StatementPattern;
 
 import de.uni_koblenz.west.splendid.index.Graph;
 import de.uni_koblenz.west.splendid.statistics.RDFStatistics;
+import de.uni_koblenz.west.splendid.test.config.Configuration;
 
 /**
  * A source selector which first uses the index to find data sources which can
@@ -54,9 +55,9 @@ public class IndexAskSelector extends AskSelector {
 	}
 	
 	@Override
-	protected Set<Graph> getSources(StatementPattern pattern) {
-		Set<Graph> sources = this.indexSel.getSources(pattern);
-		return getSources(pattern, sources);
+	protected Set<Graph> getSources(StatementPattern pattern, Configuration config) {
+		Set<Graph> sources = this.indexSel.getSources(pattern, config);
+		return getSources(pattern, sources, config);
 	}
 	
 }

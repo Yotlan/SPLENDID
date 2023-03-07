@@ -20,11 +20,11 @@
  */
 package de.uni_koblenz.west.splendid.helpers;
 
-import static org.openrdf.query.QueryLanguage.SPARQL;
+import static org.eclipse.rdf4j.query.QueryLanguage.SPARQL;
 
-import info.aduna.iteration.CloseableIteration;
-import info.aduna.iteration.EmptyIteration;
-import info.aduna.iteration.LookAheadIteration;
+import org.eclipse.rdf4j.common.iteration.CloseableIteration;
+import org.eclipse.rdf4j.common.iteration.EmptyIteration;
+import org.eclipse.rdf4j.common.iteration.LookAheadIteration;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -36,40 +36,41 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-//import org.openrdf.cursor.Cursor;
-//import org.openrdf.cursor.DelegatingCursor;
-//import org.openrdf.cursor.EmptyCursor;
-//import org.openrdf.http.client.TupleQueryClient;
-//import org.openrdf.http.client.connections.HTTPConnectionPool;
-import org.openrdf.query.Binding;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.BooleanQuery;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.TupleQuery;
-import org.openrdf.query.TupleQueryResult;
-import org.openrdf.query.UnsupportedQueryLanguageException;
-//import org.openrdf.query.algebra.QueryModel;
-import org.openrdf.query.algebra.StatementPattern;
-import org.openrdf.query.algebra.TupleExpr;
-import org.openrdf.query.algebra.evaluation.EvaluationStrategy;
-import org.openrdf.query.impl.EmptyBindingSet;
-import org.openrdf.query.parser.ParsedQuery;
-import org.openrdf.query.parser.sparql.SPARQLParser;
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.http.HTTPRepository;
-import org.openrdf.repository.http.HTTPTupleQuery;
-import org.openrdf.repository.sparql.SPARQLConnection;
-import org.openrdf.repository.sparql.SPARQLRepository;
-import org.openrdf.sail.Sail;
-import org.openrdf.sail.SailConnection;
-import org.openrdf.sail.SailException;
-//import org.openrdf.store.StoreException;
+//import org.eclipse.rdf4j.cursor.Cursor;
+//import org.eclipse.rdf4j.cursor.DelegatingCursor;
+//import org.eclipse.rdf4j.cursor.EmptyCursor;
+//import org.eclipse.rdf4j.http.client.TupleQueryClient;
+//import org.eclipse.rdf4j.http.client.connections.HTTPConnectionPool;
+import org.eclipse.rdf4j.query.Binding;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.BooleanQuery;
+import org.eclipse.rdf4j.query.MalformedQueryException;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
+import org.eclipse.rdf4j.query.QueryLanguage;
+import org.eclipse.rdf4j.query.TupleQuery;
+import org.eclipse.rdf4j.query.TupleQueryResult;
+import org.eclipse.rdf4j.query.UnsupportedQueryLanguageException;
+//import org.eclipse.rdf4j.query.algebra.QueryModel;
+import org.eclipse.rdf4j.query.algebra.StatementPattern;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.query.algebra.evaluation.EvaluationStrategy;
+import org.eclipse.rdf4j.query.impl.EmptyBindingSet;
+import org.eclipse.rdf4j.query.parser.ParsedQuery;
+import org.eclipse.rdf4j.query.parser.sparql.SPARQLParser;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryException;
+import org.eclipse.rdf4j.repository.http.HTTPRepository;
+import org.eclipse.rdf4j.repository.http.HTTPTupleQuery;
+import org.eclipse.rdf4j.repository.sparql.SPARQLConnection;
+import org.eclipse.rdf4j.repository.sparql.SPARQLRepository;
+import org.eclipse.rdf4j.sail.Sail;
+import org.eclipse.rdf4j.sail.SailConnection;
+import org.eclipse.rdf4j.sail.SailException;
+//import org.eclipse.rdf4j.store.StoreException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import de.uni_koblenz.west.splendid.test.config.Configuration;
 
 /**
  * Utility class for conveniently executing SPARQL queries.
@@ -199,11 +200,11 @@ public final class QueryExecutor {
 		return null;
 	}
 	
-	public static boolean ask(String target, String triplePattern) {
-		String query = "ASK { " + triplePattern + " }";
+	public static boolean ask(String target, String triplePattern, Configuration config) {
+		String query = "ASK { " + "GRAPH <"+ target +"> { "+ triplePattern +" }" + " }";
 		try {
 			try {
-				return prepareBooleanQuery(query, target).evaluate();
+				return prepareBooleanQuery(query, target, config).evaluate();
 			} catch (QueryEvaluationException e) {  // Sesame 3: StoreException
 				// first check for network connection error
 				Throwable cause = e.getCause();
@@ -263,7 +264,7 @@ public final class QueryExecutor {
 	/**
 	 * Prepares a TupleQuery for a SPARQL endpoint.
 	 */
-	public static BooleanQuery prepareBooleanQuery(String query, String endpoint)
+	public static BooleanQuery prepareBooleanQuery(String query, String endpoint, Configuration config)
 			throws RepositoryException, MalformedQueryException {
 		
 		if (LOGGER.isDebugEnabled()) {
@@ -273,10 +274,13 @@ public final class QueryExecutor {
 		try {
 			SPARQLRepository http = httpMap.get(endpoint);
 			if (http == null) {
-				http = new SPARQLRepository(endpoint);
+				http = new SPARQLRepository(config.getSparqlEndpoint());
 				httpMap.put(endpoint, http);
 			}
-			
+			Map<String, String> headers =new HashMap<>();
+			headers.put("Accept", "application/sparql-results+json");
+			http.setAdditionalHttpHeaders(headers);
+
 			return http.getConnection().prepareBooleanQuery(QueryLanguage.SPARQL, query);
 		} catch (RepositoryException e) {
 			// TODO Auto-generated catch block
@@ -397,7 +401,6 @@ public final class QueryExecutor {
 			
 			private BindingSet last;
 
-			@Override
 //			public BindingSet next() throws StoreException { // Sesame 3
 			public BindingSet getNextElement() { // Sesame 2
 				try {

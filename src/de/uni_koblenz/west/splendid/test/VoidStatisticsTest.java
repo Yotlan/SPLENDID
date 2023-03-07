@@ -29,7 +29,7 @@ import junit.framework.Assert;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.openrdf.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
 
 import de.uni_koblenz.west.splendid.index.Graph;
 import de.uni_koblenz.west.splendid.statistics.VoidStatistics;

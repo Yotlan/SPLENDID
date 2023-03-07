@@ -22,13 +22,13 @@ package de.uni_koblenz.west.splendid.optimizer;
 
 import java.util.List;
 
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.Dataset;
-import org.openrdf.query.algebra.StatementPattern;
-import org.openrdf.query.algebra.TupleExpr;
-import org.openrdf.query.algebra.ValueExpr;
-import org.openrdf.query.algebra.evaluation.QueryOptimizer;
-import org.openrdf.query.algebra.helpers.StatementPatternCollector;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.Dataset;
+import org.eclipse.rdf4j.query.algebra.StatementPattern;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.query.algebra.ValueExpr;
+import org.eclipse.rdf4j.query.algebra.evaluation.QueryOptimizer;
+import org.eclipse.rdf4j.query.algebra.helpers.StatementPatternCollector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,6 +46,7 @@ import de.uni_koblenz.west.splendid.sources.SourceSelector;
  * 
  * @author Olaf Goerlitz
  */
+@SuppressWarnings({"deprecation","removal"})
 public abstract class AbstractFederationOptimizer implements QueryOptimizer {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFederationOptimizer.class);
@@ -111,7 +112,7 @@ public abstract class AbstractFederationOptimizer implements QueryOptimizer {
 		List<ValueExpr> conditions = FilterConditionCollector.process(expr);
 		
 		// create patterns with source mappings
-		List<MappedStatementPattern> mappedPatterns = this.sourceSelector.mapSources(patterns);
+		List<MappedStatementPattern> mappedPatterns = this.sourceSelector.mapSources(patterns, null);
 		
 		return this.queryBuilder.createSubQueries(mappedPatterns, conditions);
 	}

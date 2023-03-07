@@ -20,18 +20,18 @@
  */
 package de.uni_koblenz.west.splendid.helpers;
 
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.query.algebra.BinaryTupleOperator;
-import org.openrdf.query.algebra.Compare;
-import org.openrdf.query.algebra.Filter;
-import org.openrdf.query.algebra.QueryModelNode;
-import org.openrdf.query.algebra.StatementPattern;
-import org.openrdf.query.algebra.UnaryTupleOperator;
-import org.openrdf.query.algebra.ValueConstant;
-import org.openrdf.query.algebra.Var;
-import org.openrdf.query.algebra.helpers.QueryModelVisitorBase;
-import org.openrdf.query.algebra.helpers.StatementPatternCollector;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.query.algebra.BinaryTupleOperator;
+import org.eclipse.rdf4j.query.algebra.Compare;
+import org.eclipse.rdf4j.query.algebra.Filter;
+import org.eclipse.rdf4j.query.algebra.QueryModelNode;
+import org.eclipse.rdf4j.query.algebra.StatementPattern;
+import org.eclipse.rdf4j.query.algebra.UnaryTupleOperator;
+import org.eclipse.rdf4j.query.algebra.ValueConstant;
+import org.eclipse.rdf4j.query.algebra.Var;
+import org.eclipse.rdf4j.query.algebra.helpers.QueryModelVisitorBase;
+import org.eclipse.rdf4j.query.algebra.helpers.StatementPatternCollector;
 
 import de.uni_koblenz.west.splendid.estimation.AbstractCardinalityEstimator;
 import de.uni_koblenz.west.splendid.estimation.AbstractCostEstimator;
@@ -45,6 +45,7 @@ import de.uni_koblenz.west.splendid.model.RemoteQuery;
  * 
  * @author Olaf Goerlitz
  */
+@SuppressWarnings({"deprecation","removal"})
 public class AnnotatingTreePrinter extends QueryModelVisitorBase<RuntimeException> {
 	
 	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
@@ -118,7 +119,7 @@ public class AnnotatingTreePrinter extends QueryModelVisitorBase<RuntimeExceptio
 	public void meet(Var node) throws RuntimeException {
 		if (node.hasValue()) {
 			Value value = node.getValue();
-			if (value instanceof URI)
+			if (value instanceof IRI)
 				buffer.append("<").append(value).append(">");
 			else
 				buffer.append(node.getValue());

@@ -26,8 +26,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.openrdf.model.Value;
-import org.openrdf.query.algebra.StatementPattern;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.query.algebra.StatementPattern;
 
 /**
  * Index for triple patterns taken from a SPARQL query. The indexing only

@@ -20,7 +20,7 @@
  */
 package de.uni_koblenz.west.splendid.config;
 
-import org.openrdf.sail.config.SailConfigException;
+import org.eclipse.rdf4j.sail.config.SailConfigException;
 
 import de.uni_koblenz.west.splendid.FederationSail;
 

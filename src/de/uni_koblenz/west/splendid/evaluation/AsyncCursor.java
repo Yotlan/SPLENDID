@@ -20,18 +20,18 @@
  */
 package de.uni_koblenz.west.splendid.evaluation;
 
-import info.aduna.iteration.CloseableIteration;
-import info.aduna.iteration.LookAheadIteration;
+import org.eclipse.rdf4j.common.iteration.CloseableIteration;
+import org.eclipse.rdf4j.common.iteration.LookAheadIteration;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
-import org.openrdf.query.QueryEvaluationException;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
 
-//import org.openrdf.cursor.Cursor;
-//import org.openrdf.store.StoreException;
+//import org.eclipse.rdf4j.cursor.Cursor;
+//import org.eclipse.rdf4j.store.StoreException;
 
 /**
  * Allows for asynchronous fetching of the cursor's input data.
@@ -67,7 +67,6 @@ public class AsyncCursor<E> extends LookAheadIteration<E, QueryEvaluationExcepti
 	/**
 	 * Stop the evaluation thread and close any open cursor.
 	 */
-	@Override
 //	public void close() throws StoreException {
 	protected void handleClose() throws QueryEvaluationException {
 		if (result != null)
@@ -76,7 +75,6 @@ public class AsyncCursor<E> extends LookAheadIteration<E, QueryEvaluationExcepti
 			future.cancel(true);
 	}
 	
-	@Override
 //	public BindingSet next() throws StoreException {
 	protected E getNextElement() throws QueryEvaluationException {
 		try {

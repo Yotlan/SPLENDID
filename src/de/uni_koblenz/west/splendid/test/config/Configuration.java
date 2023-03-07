@@ -24,6 +24,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -32,23 +33,26 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
-import org.openrdf.model.Graph;
-import org.openrdf.model.impl.GraphImpl;
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.config.RepositoryConfig;
-import org.openrdf.repository.config.RepositoryConfigException;
-import org.openrdf.repository.config.RepositoryFactory;
-import org.openrdf.repository.config.RepositoryImplConfig;
-import org.openrdf.repository.config.RepositoryRegistry;
-import org.openrdf.repository.sail.SailRepository;
-import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.RDFHandlerException;
-import org.openrdf.rio.RDFParseException;
-import org.openrdf.rio.RDFParser;
-import org.openrdf.rio.Rio;
-import org.openrdf.rio.UnsupportedRDFormatException;
-import org.openrdf.rio.helpers.StatementCollector;
+import org.apache.commons.io.filefilter.WildcardFileFilter;
+
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.impl.DynamicModel;
+import org.eclipse.rdf4j.model.impl.DynamicModelFactory;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryException;
+import org.eclipse.rdf4j.repository.config.RepositoryConfig;
+import org.eclipse.rdf4j.repository.config.RepositoryConfigException;
+import org.eclipse.rdf4j.repository.config.RepositoryFactory;
+import org.eclipse.rdf4j.repository.config.RepositoryImplConfig;
+import org.eclipse.rdf4j.repository.config.RepositoryRegistry;
+import org.eclipse.rdf4j.repository.sail.SailRepository;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.RDFHandlerException;
+import org.eclipse.rdf4j.rio.RDFParseException;
+import org.eclipse.rdf4j.rio.RDFParser;
+import org.eclipse.rdf4j.rio.Rio;
+import org.eclipse.rdf4j.rio.UnsupportedRDFormatException;
+import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,10 +68,11 @@ public class Configuration {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(Configuration.class);
 	
-	private static final String PROP_REP_CONFIG = "repository.config";
-	private static final String PROP_QUERY_DIR  = "query.directory";
-	private static final String PROP_QUERY_EXT  = "query.extension";
-	private static final String PROP_OUT_FILE   = "output.file";
+	private static final String PROP_REP_CONFIG 		= "repository.config";
+	private static final String PROP_QUERY_DIR  		= "query.directory";
+	private static final String PROP_QUERY_EXT  		= "query.extension";
+	private static final String PROP_OUT_FILE   		= "output.file";
+	private static final String PROP_SPARQL_ENDPOINT 	= "sparql.endpoint";
 	
 	private File cfgFile;
 	private Properties props = new Properties();
@@ -131,7 +136,7 @@ public class Configuration {
 			repConf.validate();
 			RepositoryImplConfig implConf = repConf.getRepositoryImplConfig();
 			RepositoryRegistry registry = RepositoryRegistry.getInstance();
-			RepositoryFactory factory = registry.get(implConf.getType());
+			RepositoryFactory factory = registry.get(implConf.getType()).get();
 			if (factory == null) {
 				throw new ConfigurationException("Unsupported repository type: " + implConf.getType() + " in repository config");
 			}
@@ -277,16 +282,16 @@ public class Configuration {
 	 * @return the repository configuration model.
 	 * @throws ConfigurationException if an error occurs while loading the configuration.
 	 */
-	private Graph loadRDFConfig(String repConfig) throws ConfigurationException {
+	private Model loadRDFConfig(String repConfig) throws ConfigurationException {
 		
 		String baseURI = cfgFile.toURI().toString();
 		File file = new File(cfgFile.toURI().resolve(repConfig)).getAbsoluteFile();
-		RDFFormat format = Rio.getParserFormatForFileName(repConfig);
+		RDFFormat format = Rio.getParserFormatForFileName(repConfig).get();
 		if (format == null)
 			throw new ConfigurationException("unknown RDF format of repository config: " + file);
 		
 		try {
-			Graph model = new GraphImpl();
+			Model model = new DynamicModel(new DynamicModelFactory());
 			RDFParser parser = Rio.createParser(format);
 			parser.setRDFHandler(new StatementCollector(model));
 			parser.parse(new FileReader(file), baseURI);
@@ -301,6 +306,10 @@ public class Configuration {
 		} catch (IOException e) {
 			throw new ConfigurationException("cannot load repository config, IO error: " + e.getMessage());
 		}
+	}
+
+	public String getSparqlEndpoint() {
+		return this.props.getProperty(PROP_SPARQL_ENDPOINT);
 	}
 
 }

@@ -29,33 +29,34 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.openrdf.model.Graph;
-import org.openrdf.model.impl.GraphImpl;
-import org.openrdf.query.BooleanQuery;
-import org.openrdf.query.GraphQuery;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.Query;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.TupleQuery;
-import org.openrdf.query.TupleQueryResultHandlerException;
-import org.openrdf.query.resultio.sparqljson.SPARQLResultsJSONWriter;
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.config.RepositoryConfig;
-import org.openrdf.repository.config.RepositoryConfigException;
-import org.openrdf.repository.config.RepositoryFactory;
-import org.openrdf.repository.config.RepositoryImplConfig;
-import org.openrdf.repository.config.RepositoryRegistry;
-import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.RDFHandlerException;
-import org.openrdf.rio.RDFParseException;
-import org.openrdf.rio.RDFParser;
-import org.openrdf.rio.Rio;
-import org.openrdf.rio.UnsupportedRDFormatException;
-import org.openrdf.rio.helpers.StatementCollector;
-import org.openrdf.rio.n3.N3Writer;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.impl.DynamicModel;
+import org.eclipse.rdf4j.model.impl.DynamicModelFactory;
+import org.eclipse.rdf4j.query.BooleanQuery;
+import org.eclipse.rdf4j.query.GraphQuery;
+import org.eclipse.rdf4j.query.MalformedQueryException;
+import org.eclipse.rdf4j.query.Query;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
+import org.eclipse.rdf4j.query.QueryLanguage;
+import org.eclipse.rdf4j.query.TupleQuery;
+import org.eclipse.rdf4j.query.TupleQueryResultHandlerException;
+import org.eclipse.rdf4j.query.resultio.sparqljson.SPARQLResultsJSONWriter;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryException;
+import org.eclipse.rdf4j.repository.config.RepositoryConfig;
+import org.eclipse.rdf4j.repository.config.RepositoryConfigException;
+import org.eclipse.rdf4j.repository.config.RepositoryFactory;
+import org.eclipse.rdf4j.repository.config.RepositoryImplConfig;
+import org.eclipse.rdf4j.repository.config.RepositoryRegistry;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.RDFHandlerException;
+import org.eclipse.rdf4j.rio.RDFParseException;
+import org.eclipse.rdf4j.rio.RDFParser;
+import org.eclipse.rdf4j.rio.Rio;
+import org.eclipse.rdf4j.rio.UnsupportedRDFormatException;
+import org.eclipse.rdf4j.rio.helpers.StatementCollector;
+import org.eclipse.rdf4j.rio.n3.N3Writer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,7 +103,7 @@ public class SPLENDID {
 	public SPLENDID(String configFile) throws ConfigurationException {
 		try {
 			this.repo = getRepositoryInstance(loadRepositoryConfig(configFile));
-			this.repo.initialize();
+			this.repo.init();
 		} catch (RepositoryException e) {
 			throw new ConfigurationException("error initializing repository: " + e.getMessage());
 		}
@@ -215,15 +216,15 @@ public class SPLENDID {
 	 * @return The configuration data model.
 	 * @throws ConfigurationException If the configuration data is invalid or incomplete.
 	 */
-	private Graph loadRepositoryConfig(String configFile) throws ConfigurationException {
+	private Model loadRepositoryConfig(String configFile) throws ConfigurationException {
 		File file = new File(configFile);
 		String baseURI = file.toURI().toString();
-		RDFFormat format = Rio.getParserFormatForFileName(configFile);
+		RDFFormat format = Rio.getParserFormatForFileName(configFile).get();
 		if (format == null)
 			throw new ConfigurationException("unknown RDF format of repository config: " + file);
 		
 		try {
-			Graph model = new GraphImpl();
+			Model model = new DynamicModel(new DynamicModelFactory());
 			RDFParser parser = Rio.createParser(format);
 			parser.setRDFHandler(new StatementCollector(model));
 			parser.parse(new FileReader(file), baseURI);
@@ -249,7 +250,7 @@ public class SPLENDID {
 	 * @throws ConfigurationException If no repository could be created due to
 	 *         invalid or incomplete configuration data.
 	 */
-	private Repository getRepositoryInstance(Graph configuration) throws ConfigurationException {
+	private Repository getRepositoryInstance(Model configuration) throws ConfigurationException {
 		
 		RepositoryConfig repoConfig = null;
 		try {
@@ -261,7 +262,7 @@ public class SPLENDID {
 			
 			// initialize repository factory
 			RepositoryRegistry registry = RepositoryRegistry.getInstance();
-			RepositoryFactory factory = registry.get(repoImplConfig.getType());
+			RepositoryFactory factory = registry.get(repoImplConfig.getType()).get();
 			if (factory == null) {
 				throw new ConfigurationException("Unsupported repository type: "
 						+ repoImplConfig.getType()

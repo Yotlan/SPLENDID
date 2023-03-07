@@ -27,13 +27,13 @@ import static de.uni_koblenz.west.splendid.config.FederationSailSchema.SRC_SELEC
 import java.util.ArrayList;
 import java.util.List;
 
-import org.openrdf.model.Graph;
-import org.openrdf.model.Resource;
-import org.openrdf.model.Value;
-import org.openrdf.repository.config.RepositoryConfigException;
-import org.openrdf.repository.config.RepositoryImplConfig;
-import org.openrdf.repository.config.RepositoryImplConfigBase;
-import org.openrdf.sail.config.SailConfigException;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.repository.config.RepositoryConfigException;
+import org.eclipse.rdf4j.repository.config.RepositoryImplConfig;
+import org.eclipse.rdf4j.repository.config.RepositoryImplConfigBase;
+import org.eclipse.rdf4j.sail.config.SailConfigException;
 
 /**
  * Configuration details for federation setup including member descriptions.
@@ -80,7 +80,7 @@ public class FederationSailConfig extends AbstractSailConfig {
 	 * @return the resource representing this Sail configuration.
 	 */
 	@Override
-	public Resource export(Graph model) {
+	public Resource export(Model model) {
 		
 		Resource self = super.export(model);
 		
@@ -101,7 +101,7 @@ public class FederationSailConfig extends AbstractSailConfig {
 	 * @param implNode the resource representing this federation sail.
 	 */
 	@Override
-	public void parse(Graph model, Resource implNode) throws SailConfigException {
+	public void parse(Model model, Resource implNode) throws SailConfigException {
 		super.parse(model, implNode);
 		
 		// extract the repository settings for all defined federation members

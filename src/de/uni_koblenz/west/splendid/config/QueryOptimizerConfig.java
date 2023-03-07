@@ -28,13 +28,13 @@ import static de.uni_koblenz.west.splendid.config.FederationSailSchema.OPT_TYPE;
 import static de.uni_koblenz.west.splendid.config.FederationSailSchema.USE_BIND_JOIN;
 import static de.uni_koblenz.west.splendid.config.FederationSailSchema.USE_HASH_JOIN;
 
-import org.openrdf.model.Graph;
-import org.openrdf.model.Literal;
-import org.openrdf.model.Resource;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.query.algebra.evaluation.EvaluationStrategy;
-import org.openrdf.sail.config.SailConfigException;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Literal;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.query.algebra.evaluation.EvaluationStrategy;
+import org.eclipse.rdf4j.sail.config.SailConfigException;
 
 /**
  * Configuration settings for the query optimizer.
@@ -63,7 +63,7 @@ public class QueryOptimizerConfig extends AbstractSailConfig {
 		this.setType(type);
 	}
 	
-	public static QueryOptimizerConfig create(Graph model, Resource implNode) throws SailConfigException {
+	public static QueryOptimizerConfig create(Model model, Resource implNode) throws SailConfigException {
 		QueryOptimizerConfig config = new QueryOptimizerConfig();
 		config.parse(model, implNode);
 		return config;
@@ -95,8 +95,8 @@ public class QueryOptimizerConfig extends AbstractSailConfig {
 	}
 
 	@Override
-	public Resource export(Graph model) {
-		ValueFactory vf = ValueFactoryImpl.getInstance();
+	public Resource export(Model model) {
+		ValueFactory vf = SimpleValueFactory.getInstance();
 		
 		Resource self = super.export(model);
 		
@@ -114,7 +114,7 @@ public class QueryOptimizerConfig extends AbstractSailConfig {
 	}
 
 	@Override
-	public void parse(Graph model, Resource implNode) throws SailConfigException {
+	public void parse(Model model, Resource implNode) throws SailConfigException {
 		super.parse(model, implNode);
 		
 		Literal estimator = getObjectLiteral(model, implNode, ESTIMATOR);

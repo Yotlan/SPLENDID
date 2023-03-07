@@ -28,9 +28,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.openrdf.query.algebra.Join;
-import org.openrdf.query.algebra.TupleExpr;
-import org.openrdf.query.algebra.helpers.VarNameCollector;
+import org.eclipse.rdf4j.query.algebra.Join;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.query.algebra.helpers.VarNameCollector;
 
 /**
  * @author Olaf Goerlitz

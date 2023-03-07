@@ -20,14 +20,14 @@
  */
 package de.uni_koblenz.west.splendid.config;
 
-import org.openrdf.repository.config.RepositoryConfigException;
-import org.openrdf.repository.config.RepositoryFactory;
-import org.openrdf.repository.config.RepositoryImplConfig;
-import org.openrdf.repository.config.RepositoryRegistry;
-import org.openrdf.sail.Sail;
-import org.openrdf.sail.config.SailConfigException;
-import org.openrdf.sail.config.SailFactory;
-import org.openrdf.sail.config.SailImplConfig;
+import org.eclipse.rdf4j.repository.config.RepositoryConfigException;
+import org.eclipse.rdf4j.repository.config.RepositoryFactory;
+import org.eclipse.rdf4j.repository.config.RepositoryImplConfig;
+import org.eclipse.rdf4j.repository.config.RepositoryRegistry;
+import org.eclipse.rdf4j.sail.Sail;
+import org.eclipse.rdf4j.sail.config.SailConfigException;
+import org.eclipse.rdf4j.sail.config.SailFactory;
+import org.eclipse.rdf4j.sail.config.SailImplConfig;
 
 import de.uni_koblenz.west.splendid.FederationSail;
 import de.uni_koblenz.west.splendid.estimation.AbstractCardinalityEstimator;
@@ -53,7 +53,7 @@ import de.uni_koblenz.west.splendid.statistics.VoidStatistics;
  * based on the supplied configuration data.
  * 
  * ATTENTION: This factory must be published with full package name in
- *            META-INF/services/org.openrdf.sail.config.SailFactory
+ *            META-INF/services/org.eclipse.rdf4j.sail.config.SailFactory
  * 
  * @author Olaf Goerlitz
  */
@@ -110,7 +110,7 @@ public class FederationSailFactory implements SailFactory {
 		
 		// Create all member repositories
 		for (RepositoryImplConfig repConfig : cfg.getMemberConfigs()) {
-			RepositoryFactory factory = registry.get(repConfig.getType());
+			RepositoryFactory factory = registry.get(repConfig.getType()).get();
 			if (factory == null) {
 				throw new SailConfigException("Unsupported repository type: " + repConfig.getType());
 			}

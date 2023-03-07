@@ -20,8 +20,8 @@
  */
 package de.uni_koblenz.west.splendid.estimation;
 
-import org.openrdf.model.Value;
-import org.openrdf.model.vocabulary.RDF;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 
 import de.uni_koblenz.west.splendid.index.Graph;
 import de.uni_koblenz.west.splendid.model.MappedStatementPattern;

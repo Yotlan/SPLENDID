@@ -20,19 +20,19 @@
  */
 package de.uni_koblenz.west.splendid.helpers;
 
-//import org.openrdf.query.algebra.NaryTupleOperator;
-//import org.openrdf.query.algebra.TupleExpr;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.query.algebra.BinaryTupleOperator;
-import org.openrdf.query.algebra.Compare;
-import org.openrdf.query.algebra.Filter;
-import org.openrdf.query.algebra.Join;
-import org.openrdf.query.algebra.QueryModelNode;
-import org.openrdf.query.algebra.StatementPattern;
-import org.openrdf.query.algebra.ValueConstant;
-import org.openrdf.query.algebra.Var;
-import org.openrdf.query.algebra.helpers.QueryModelVisitorBase;
+//import org.eclipse.rdf4j.query.algebra.NaryTupleOperator;
+//import org.eclipse.rdf4j.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.query.algebra.BinaryTupleOperator;
+import org.eclipse.rdf4j.query.algebra.Compare;
+import org.eclipse.rdf4j.query.algebra.Filter;
+import org.eclipse.rdf4j.query.algebra.Join;
+import org.eclipse.rdf4j.query.algebra.QueryModelNode;
+import org.eclipse.rdf4j.query.algebra.StatementPattern;
+import org.eclipse.rdf4j.query.algebra.ValueConstant;
+import org.eclipse.rdf4j.query.algebra.Var;
+import org.eclipse.rdf4j.query.algebra.helpers.QueryModelVisitorBase;
 
 /**
  * Generates the SPARQL representation for a query model.
@@ -108,7 +108,7 @@ public class SparqlPrinter extends QueryModelVisitorBase<RuntimeException> {
 		if (node.hasValue()) {
 			// bound variable (constant)
 			Value value = node.getValue();
-			if (value instanceof URI)
+			if (value instanceof IRI)
 				buffer.append("<").append(value).append(">");
 			else
 				buffer.append(value);

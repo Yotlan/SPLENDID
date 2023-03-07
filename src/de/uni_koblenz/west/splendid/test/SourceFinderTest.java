@@ -25,8 +25,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.junit.BeforeClass;
-import org.openrdf.query.BindingSet;
-import org.openrdf.repository.Repository;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.repository.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

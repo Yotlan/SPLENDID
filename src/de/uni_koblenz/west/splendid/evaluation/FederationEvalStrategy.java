@@ -20,10 +20,10 @@
  */
 package de.uni_koblenz.west.splendid.evaluation;
 
-import info.aduna.iteration.CloseableIteration;
-import info.aduna.iteration.DistinctIteration;
-import info.aduna.iteration.EmptyIteration;
-import info.aduna.iteration.UnionIteration;
+import org.eclipse.rdf4j.common.iteration.CloseableIteration;
+import org.eclipse.rdf4j.common.iteration.DistinctIteration;
+import org.eclipse.rdf4j.common.iteration.EmptyIteration;
+import org.eclipse.rdf4j.common.iteration.UnionIteration;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -34,27 +34,27 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-//import org.openrdf.cursor.Cursor;
-import org.openrdf.model.Resource;
-import org.openrdf.model.Statement;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.algebra.Join;
-import org.openrdf.query.algebra.LeftJoin;
-import org.openrdf.query.algebra.QueryModelNode;
-import org.openrdf.query.algebra.StatementPattern;
-import org.openrdf.query.algebra.TupleExpr;
-import org.openrdf.query.algebra.UnaryTupleOperator;
-import org.openrdf.query.algebra.evaluation.TripleSource;
-//import org.openrdf.query.algebra.evaluation.cursors.DistinctCursor;
-//import org.openrdf.query.algebra.evaluation.cursors.UnionCursor;
-import org.openrdf.query.algebra.evaluation.impl.EvaluationStrategyImpl;
-import org.openrdf.query.algebra.evaluation.iterator.JoinIterator;
-import org.openrdf.query.algebra.helpers.QueryModelVisitorBase;
-//import org.openrdf.store.StoreException;
+//import org.eclipse.rdf4j.cursor.Cursor;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
+import org.eclipse.rdf4j.query.algebra.Join;
+import org.eclipse.rdf4j.query.algebra.LeftJoin;
+import org.eclipse.rdf4j.query.algebra.QueryModelNode;
+import org.eclipse.rdf4j.query.algebra.StatementPattern;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.query.algebra.UnaryTupleOperator;
+import org.eclipse.rdf4j.query.algebra.evaluation.TripleSource;
+//import org.eclipse.rdf4j.query.algebra.evaluation.cursors.DistinctCursor;
+//import org.eclipse.rdf4j.query.algebra.evaluation.cursors.UnionCursor;
+import org.eclipse.rdf4j.query.algebra.evaluation.impl.EvaluationStrategyImpl;
+import org.eclipse.rdf4j.query.algebra.evaluation.iterator.JoinIterator;
+import org.eclipse.rdf4j.query.algebra.helpers.QueryModelVisitorBase;
+//import org.eclipse.rdf4j.store.StoreException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -103,12 +103,12 @@ public class FederationEvalStrategy extends EvaluationStrategyImpl {
 				return vf;
 			}
 //			@Override public Cursor<? extends Statement> getStatements(
-//					Resource subj, URI pred, Value obj, Resource... contexts) throws StoreException {
+//					Resource subj, IRI pred, Value obj, Resource... contexts) throws StoreException {
 			@Override public CloseableIteration<? extends Statement, QueryEvaluationException> getStatements(
-					Resource subj, URI pred, Value obj, Resource... contexts) throws QueryEvaluationException {
+					Resource subj, IRI pred, Value obj, Resource... contexts) throws QueryEvaluationException {
 				throw new UnsupportedOperationException("Statement retrieval is not supported in federation");
 			}
-		});
+		},null,null);
 	}
 	
 	// -------------------------------------------------------------------------

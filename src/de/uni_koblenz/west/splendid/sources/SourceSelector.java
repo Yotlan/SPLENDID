@@ -22,11 +22,13 @@ package de.uni_koblenz.west.splendid.sources;
 
 import java.util.List;
 
-import org.openrdf.query.algebra.StatementPattern;
-import org.openrdf.sail.SailException;
+import org.eclipse.rdf4j.query.algebra.StatementPattern;
+import org.eclipse.rdf4j.sail.SailException;
 
 import de.uni_koblenz.west.splendid.model.MappedStatementPattern;
 import de.uni_koblenz.west.splendid.statistics.RDFStatistics;
+
+import de.uni_koblenz.west.splendid.test.config.Configuration;
 
 /**
  * Interface for source selection strategies.
@@ -35,7 +37,7 @@ import de.uni_koblenz.west.splendid.statistics.RDFStatistics;
  */
 public interface SourceSelector {
 	
-	public void initialize() throws SailException;
+	public void init() throws SailException;
 	
 	public void setStatistics(RDFStatistics stats);
 	
@@ -45,6 +47,6 @@ public interface SourceSelector {
 	 * @param patterns the SPARQL triple patterns which need to be mapped.
 	 * @return a list triple patterns with mappings to sources.
 	 */
-	public List<MappedStatementPattern> mapSources(List<StatementPattern> patterns);
+	public List<MappedStatementPattern> mapSources(List<StatementPattern> patterns, Configuration config);
 
 }

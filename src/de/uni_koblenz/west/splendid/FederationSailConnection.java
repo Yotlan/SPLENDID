@@ -20,29 +20,29 @@
  */
 package de.uni_koblenz.west.splendid;
 
-import info.aduna.iteration.CloseableIteration;
+import org.eclipse.rdf4j.common.iteration.CloseableIteration;
 
-import org.openrdf.model.Namespace;
-import org.openrdf.model.Resource;
-import org.openrdf.model.Statement;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.Dataset;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.algebra.TupleExpr;
-import org.openrdf.query.algebra.evaluation.EvaluationStrategy;
-import org.openrdf.query.algebra.evaluation.QueryOptimizer;
-import org.openrdf.query.algebra.evaluation.TripleSource;
-import org.openrdf.query.algebra.evaluation.impl.BindingAssigner;
-import org.openrdf.query.algebra.evaluation.impl.CompareOptimizer;
-import org.openrdf.query.algebra.evaluation.impl.ConjunctiveConstraintSplitter;
-import org.openrdf.query.algebra.evaluation.impl.DisjunctiveConstraintOptimizer;
-import org.openrdf.query.algebra.evaluation.impl.SameTermFilterOptimizer;
-import org.openrdf.query.algebra.evaluation.util.QueryOptimizerList;
-import org.openrdf.query.impl.EmptyBindingSet;
-import org.openrdf.sail.SailConnection;
-import org.openrdf.sail.SailException;
+import org.eclipse.rdf4j.model.Namespace;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.Dataset;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.query.algebra.evaluation.EvaluationStrategy;
+import org.eclipse.rdf4j.query.algebra.evaluation.QueryOptimizer;
+import org.eclipse.rdf4j.query.algebra.evaluation.TripleSource;
+import org.eclipse.rdf4j.query.algebra.evaluation.impl.BindingAssigner;
+import org.eclipse.rdf4j.query.algebra.evaluation.impl.CompareOptimizer;
+import org.eclipse.rdf4j.query.algebra.evaluation.impl.ConjunctiveConstraintSplitter;
+import org.eclipse.rdf4j.query.algebra.evaluation.impl.DisjunctiveConstraintOptimizer;
+import org.eclipse.rdf4j.query.algebra.evaluation.impl.SameTermFilterOptimizer;
+import org.eclipse.rdf4j.query.algebra.evaluation.util.QueryOptimizerList;
+import org.eclipse.rdf4j.query.impl.EmptyBindingSet;
+import org.eclipse.rdf4j.sail.SailConnection;
+import org.eclipse.rdf4j.sail.SailException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,6 +60,7 @@ import de.uni_koblenz.west.splendid.helpers.ReadOnlySailConnection;
  * 
  * @author Olaf Goerlitz
  */
+@SuppressWarnings({"deprecation","removal"})
 public class FederationSailConnection extends ReadOnlySailConnection {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(FederationSailConnection.class);
@@ -104,7 +105,6 @@ public class FederationSailConnection extends ReadOnlySailConnection {
 	 * @throws StoreException
 	 *             If the Sail encountered an error or invalid internal state.
 	 */
-	@Override
 	public CloseableIteration<? extends BindingSet, QueryEvaluationException> evaluateInternal(TupleExpr query, Dataset dataset,
 			BindingSet bindings, boolean includeInferred) throws SailException {	// Sesame 2:
 		
@@ -138,32 +138,26 @@ public class FederationSailConnection extends ReadOnlySailConnection {
 	
 	// Sesame 2: Overriding internal methods ==================================
 	
-	@Override
 	protected void closeInternal() throws SailException {
 		// do nothing, calling super.close() creates a loop in Sesame 2
 	}
 
-	@Override
 	protected CloseableIteration<? extends Resource, SailException> getContextIDsInternal() throws SailException {
 		throw new UnsupportedOperationException("Not implemented");
 	}
 
-	@Override
 	protected String getNamespaceInternal(String prefix) throws SailException {
 		throw new UnsupportedOperationException("Not implemented");
 	}
 
-	@Override
 	protected CloseableIteration<? extends Namespace, SailException> getNamespacesInternal() throws SailException {
 		throw new UnsupportedOperationException("Not implemented");
 	}
 
-	@Override
-	protected CloseableIteration<? extends Statement, SailException> getStatementsInternal(Resource subj, URI pred, Value obj, boolean includeInferred, Resource... contexts) throws SailException {
+	protected CloseableIteration<? extends Statement, SailException> getStatementsInternal(Resource subj, IRI pred, Value obj, boolean includeInferred, Resource... contexts) throws SailException {
 		throw new UnsupportedOperationException("Not implemented");
 	}
 
-	@Override
 	protected long sizeInternal(Resource... contexts) throws SailException {
 		throw new UnsupportedOperationException("Not implemented");
 	}

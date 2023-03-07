@@ -23,8 +23,8 @@ package de.uni_koblenz.west.splendid.model;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.openrdf.query.algebra.QueryModelVisitor;
-import org.openrdf.query.algebra.StatementPattern;
+import org.eclipse.rdf4j.query.algebra.QueryModelVisitor;
+import org.eclipse.rdf4j.query.algebra.StatementPattern;
 
 import de.uni_koblenz.west.splendid.helpers.OperatorTreePrinter;
 import de.uni_koblenz.west.splendid.index.Graph;

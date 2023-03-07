@@ -20,22 +20,22 @@
  */
 package de.uni_koblenz.west.splendid.config;
 
-import static org.openrdf.sail.config.SailConfigSchema.SAILTYPE;
+import static org.eclipse.rdf4j.sail.config.SailConfigSchema.SAILTYPE;
 
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.openrdf.model.BNode;
-import org.openrdf.model.Graph;
-import org.openrdf.model.Literal;
-import org.openrdf.model.Resource;
-import org.openrdf.model.Statement;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.sail.config.SailConfigException;
-import org.openrdf.sail.config.SailImplConfig;
+import org.eclipse.rdf4j.model.BNode;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Literal;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.sail.config.SailConfigException;
+import org.eclipse.rdf4j.sail.config.SailImplConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,13 +51,13 @@ public abstract class AbstractSailConfig implements SailImplConfig {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractSailConfig.class);
 	
 	private String type;
-	private URI typePredicate;
+	private IRI typePredicate;
 	
 	protected AbstractSailConfig() {
 		this.typePredicate = SAILTYPE;
 	}
 	
-	protected AbstractSailConfig(URI typePredicate) {
+	protected AbstractSailConfig(IRI typePredicate) {
 		this.typePredicate = typePredicate;
 	}
 	
@@ -65,13 +65,19 @@ public abstract class AbstractSailConfig implements SailImplConfig {
 	public String getType() {
 		return type;
 	}
+
+	// Dummy getter
+	@Override
+	public long getIterationCacheSyncThreshold() {
+		return Long.MAX_VALUE;
+	}
 	
 	protected void setType(String type) {
 		this.type = type;
 	}
 
 	@Override
-	public Resource export(Graph model) {
+	public Resource export(Model model) {
 		ValueFactoryImpl vf = ValueFactoryImpl.getInstance();
 
 		BNode implNode = vf.createBNode();
@@ -84,7 +90,7 @@ public abstract class AbstractSailConfig implements SailImplConfig {
 	}
 
 	@Override
-	public void parse(Graph model, Resource implNode) throws SailConfigException {
+	public void parse(Model model, Resource implNode) throws SailConfigException {
 		Literal typeLit = getObjectLiteral(model, implNode, this.typePredicate);
 		if (typeLit != null) {
 			this.type = typeLit.getLabel();
@@ -109,8 +115,8 @@ public abstract class AbstractSailConfig implements SailImplConfig {
 	 * @return the literal value of the object or null.
 	 * @throws SailConfigException if there is no literal to return.
 	 */
-	protected Literal getObjectLiteral(Graph model, Resource implNode, URI property) throws SailConfigException {
-		Iterator<Statement> objects = model.match(implNode, property, null);
+	protected Literal getObjectLiteral(Model model, Resource implNode, IRI property) throws SailConfigException {
+		Iterator<Statement> objects = model.filter(implNode, property, null).iterator();
 		if (!objects.hasNext())
 			return null;
 		Statement st = objects.next();
@@ -132,7 +138,7 @@ public abstract class AbstractSailConfig implements SailImplConfig {
 	 * @return the boolean value of the object or the default value.
 	 * @throws SailConfigException if there is no (single) resource to return.
 	 */
-	protected boolean getObjectBoolean(Graph model, Resource implNode, URI property, boolean defaultValue) throws SailConfigException {
+	protected boolean getObjectBoolean(Model model, Resource implNode, IRI property, boolean defaultValue) throws SailConfigException {
 		try {
 			return getObjectLiteral(model, implNode, property).booleanValue();
 		} catch (NullPointerException e) {
@@ -152,8 +158,8 @@ public abstract class AbstractSailConfig implements SailImplConfig {
 	 * @return the resource representing the configuration attribute or null.
 	 * @throws SailConfigException if there is no (single) resource to return.
 	 */
-	protected Resource getObjectResource(Graph model, Resource implNode, URI predicate) throws SailConfigException {
-		Iterator<Statement> objects = model.match(implNode, predicate, null);
+	protected Resource getObjectResource(Model model, Resource implNode, IRI predicate) throws SailConfigException {
+		Iterator<Statement> objects = model.filter(implNode, predicate, null).iterator();
 		if (!objects.hasNext())
 			return null;
 //			throw new SailConfigException("found no object value for " + predicate);
@@ -175,12 +181,12 @@ public abstract class AbstractSailConfig implements SailImplConfig {
 	 * @param option configuration option to look for
 	 * @return set of found values for the configuration setting.
 	 */
-//	protected Set<Value> filter(Model model, Resource implNode, URI option) { // Sesame 3
-	protected Set<Value> filter(Graph model, Resource implNode, URI option) { // Sesame 2
+//	protected Set<Value> filter(Model model, Resource implNode, IRI option) { // Sesame 3
+	protected Set<Value> filter(Model model, Resource implNode, IRI option) { // Sesame 2
 //		return model.filter(implNode, MEMBER, null).objects(); // Sesame 3
 		// Sesame 2:
 		Set<Value> values = new HashSet<Value>();
-		Iterator<Statement> objects = model.match(implNode, option, null);
+		Iterator<Statement> objects = model.filter(implNode, option, null).iterator();
 		while (objects.hasNext()) {
 			values.add(objects.next().getObject());
 		}

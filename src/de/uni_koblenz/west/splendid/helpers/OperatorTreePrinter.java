@@ -20,19 +20,19 @@
  */
 package de.uni_koblenz.west.splendid.helpers;
 
-//import org.openrdf.query.algebra.NaryTupleOperator;
-//import org.openrdf.query.algebra.TupleExpr;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.query.algebra.BinaryTupleOperator;
-import org.openrdf.query.algebra.Compare;
-import org.openrdf.query.algebra.Filter;
-import org.openrdf.query.algebra.QueryModelNode;
-import org.openrdf.query.algebra.StatementPattern;
-import org.openrdf.query.algebra.ValueConstant;
-import org.openrdf.query.algebra.Var;
-import org.openrdf.query.algebra.helpers.QueryModelTreePrinter;
-import org.openrdf.query.algebra.helpers.QueryModelVisitorBase;
+//import org.eclipse.rdf4j.query.algebra.NaryTupleOperator;
+//import org.eclipse.rdf4j.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.query.algebra.BinaryTupleOperator;
+import org.eclipse.rdf4j.query.algebra.Compare;
+import org.eclipse.rdf4j.query.algebra.Filter;
+import org.eclipse.rdf4j.query.algebra.QueryModelNode;
+import org.eclipse.rdf4j.query.algebra.StatementPattern;
+import org.eclipse.rdf4j.query.algebra.ValueConstant;
+import org.eclipse.rdf4j.query.algebra.Var;
+import org.eclipse.rdf4j.query.algebra.helpers.QueryModelTreePrinter;
+import org.eclipse.rdf4j.query.algebra.helpers.QueryModelVisitorBase;
 
 /**
  * Prints the operator tree of a query model.
@@ -114,7 +114,7 @@ public class OperatorTreePrinter extends QueryModelVisitorBase<RuntimeException>
 	public void meet(Var node) throws RuntimeException {
 		if (node.hasValue()) {
 			Value value = node.getValue();
-			if (value instanceof URI)
+			if (value instanceof IRI)
 				buffer.append("<").append(value).append(">");
 			else
 				buffer.append(node.getValue());
