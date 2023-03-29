@@ -89,11 +89,12 @@ public abstract class SourceSelectorBase implements SourceSelector {
 			
 			// get sources for the first pattern in group (with same constants)
 			StatementPattern firstPattern = patternGroup.get(0);
+			//System.out.println("SourceSelectorBase Config: "+config);
 			Set<Graph> sources = getSources(firstPattern, config);
 			
 			// print warning if no sources were found
 			if (sources.size() == 0) {
-				LOGGER.warn("cannot find any source for: " + OperatorTreePrinter.print(firstPattern));
+				//LOGGER.warn("cannot find any source for: " + OperatorTreePrinter.print(firstPattern));
 			}
 			
 			for (StatementPattern pattern : patternGroup) {

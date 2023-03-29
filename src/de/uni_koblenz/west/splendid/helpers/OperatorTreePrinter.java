@@ -31,8 +31,8 @@ import org.eclipse.rdf4j.query.algebra.QueryModelNode;
 import org.eclipse.rdf4j.query.algebra.StatementPattern;
 import org.eclipse.rdf4j.query.algebra.ValueConstant;
 import org.eclipse.rdf4j.query.algebra.Var;
-import org.eclipse.rdf4j.query.algebra.helpers.QueryModelTreePrinter;
-import org.eclipse.rdf4j.query.algebra.helpers.QueryModelVisitorBase;
+//import org.eclipse.rdf4j.query.algebra.helpers.QueryModelTreePrinter;
+import org.eclipse.rdf4j.query.algebra.helpers.AbstractQueryModelVisitor;
 
 /**
  * Prints the operator tree of a query model.
@@ -40,7 +40,7 @@ import org.eclipse.rdf4j.query.algebra.helpers.QueryModelVisitorBase;
  * 
  * @author Olaf Goerlitz.
  */
-public class OperatorTreePrinter extends QueryModelVisitorBase<RuntimeException> {
+public class OperatorTreePrinter extends AbstractQueryModelVisitor<RuntimeException> {
 	
 	private static final OperatorTreePrinter printer = new OperatorTreePrinter();
 	

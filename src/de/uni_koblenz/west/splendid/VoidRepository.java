@@ -25,7 +25,7 @@ import java.io.IOException;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
@@ -44,7 +44,7 @@ public class VoidRepository implements Repository {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(VoidRepository.class);
 	
-	protected final ValueFactory vf = new ValueFactoryImpl();
+	protected final ValueFactory vf = SimpleValueFactory.getInstance();
 	protected IRI endpoint;
 	protected final IRI voidIRI;
 	
@@ -98,7 +98,7 @@ public class VoidRepository implements Repository {
 		try {
 			this.endpoint = VoidStatistics.getInstance().load(this.voidIRI, this.endpoint);
 		} catch (IOException e) {
-			throw new RepositoryException("can not read voiD description: " + this.voidIRI + e.getMessage(), e);
+			throw new RepositoryException("can not read voiD description " + this.voidIRI + " because of the following error: " + e.getMessage(), e);
 		}
 		
 		this.initialized = true;

@@ -29,7 +29,7 @@ import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
 //import org.eclipse.rdf4j.model.impl.BNodeFactoryImpl;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.query.BooleanQuery;
 import org.eclipse.rdf4j.query.GraphQuery;
 import org.eclipse.rdf4j.query.MalformedQueryException;
@@ -75,7 +75,7 @@ public class VoidRepositoryConnection extends ReadOnlyRepositoryConnection {
 //		IRIFactory uf = repository.getIRIFactory();
 //		LiteralFactory lf = repository.getLiteralFactory();
 //		this.vf = new ValueFactoryImpl(bf, uf, lf);
-		this.vf = new ValueFactoryImpl();
+		this.vf = SimpleValueFactory.getInstance();
 	}
 	
 	// -------------------------------------------------------------------------

@@ -23,7 +23,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,15 +34,22 @@ import java.util.List;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.impl.DynamicModel;
 import org.eclipse.rdf4j.model.impl.DynamicModelFactory;
+//import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.BooleanQuery;
 import org.eclipse.rdf4j.query.GraphQuery;
 import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.eclipse.rdf4j.query.Query;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
+import org.eclipse.rdf4j.query.QueryInterruptedException;
 import org.eclipse.rdf4j.query.QueryLanguage;
+//import org.eclipse.rdf4j.query.QueryResult;
 import org.eclipse.rdf4j.query.TupleQuery;
+import org.eclipse.rdf4j.query.TupleQueryResultHandler;
+//import org.eclipse.rdf4j.query.TupleQueryResult;
 import org.eclipse.rdf4j.query.TupleQueryResultHandlerException;
-import org.eclipse.rdf4j.query.resultio.sparqljson.SPARQLResultsJSONWriter;
+import org.eclipse.rdf4j.query.explanation.Explanation.Level;
+//import org.eclipse.rdf4j.query.resultio.sparqljson.SPARQLResultsJSONWriter;
+import org.eclipse.rdf4j.query.resultio.text.csv.SPARQLResultsCSVWriter;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
@@ -60,6 +69,7 @@ import org.eclipse.rdf4j.rio.n3.N3Writer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.uni_koblenz.west.splendid.sources.SourceSelectorBase;
 import de.uni_koblenz.west.splendid.test.config.ConfigurationException;
 
 /**
@@ -72,20 +82,37 @@ public class SPLENDID {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SPLENDID.class);
 	
 	private Repository repo;
+
+	public static QueryInfo queryInfo = new QueryInfo();
 	
 	public static void main(String[] args) {
 		
-		if (args.length < 2) {
-			System.out.println("USAGE: java SPLENDID <config> <query>");
+		if (args.length < 7) {
+			System.out.println("USAGE: java SPLENDID <config> <provenance> <timeout> <result> <explain> <stat> <query>\nONLY have theses args: ");
+			for(int i=0; i<args.length; i++) {
+				System.out.println("- "+args[i]);
+			}
 			System.exit(1);
 		}
 		
 		String configFile = args[0];
-		List<String> queryFiles = Arrays.asList(Arrays.copyOfRange(args, 1, args.length));
+		String provenancetime = args[1];
+		//System.out.println(provenancetime);
+		String timeout = args[2];
+		String resultfile = args[3];
+		//System.out.println(resultfile);
+		String explanationfile = args[4];
+		//System.out.println(explanationfile);
+		String statfile = args[5];
+		//System.out.println(statfile);
+		List<String> queryFiles = Arrays.asList(Arrays.copyOfRange(args, 6, args.length));
+		//System.out.println(queryFiles);
 		
 		try {
+			LOGGER.info("Init SPLENDID...");
 			SPLENDID splendid = new SPLENDID(configFile);
-			splendid.execSparqlQueries(queryFiles);
+			LOGGER.info("Exec SPARQL queries...");
+			splendid.execSparqlQueries(queryFiles, Integer.valueOf(timeout), resultfile, provenancetime, explanationfile, statfile);
 		} catch (ConfigurationException e) {
 			e.printStackTrace();
 		}
@@ -156,6 +183,7 @@ public class SPLENDID {
 					buffer.append(input).append("\n");
 				}
 				queries.add(buffer.toString());
+				//r.close(); //Also throw an IOException
 			} catch (FileNotFoundException e) {
 				LOGGER.warn("cannot find query file: " + query);
 			} catch (IOException e) {
@@ -171,20 +199,39 @@ public class SPLENDID {
 	 * 
 	 * @param queryFiles A list of files containing the queries.
 	 */
-	private void execSparqlQueries(List<String> queryFiles) {
+	private void execSparqlQueries(List<String> queryFiles, int timeout, String resultfile, String provenancetime, String explanationfile, String statfile) {
 		if (queryFiles == null || queryFiles.size() == 0) {
 			LOGGER.warn("No query files specified");
 		}
 		
 		for (String queryString : loadSparqlQueries(queryFiles)) {
-			System.out.println("Executing QUERY:\n" + queryString);
-			System.out.println("RESULT:\n");
+			//LOGGER.info("Executing QUERY:\n" + queryString);
+			//LOGGER.info("RESULT:");
 			try {
 				RepositoryConnection con = repo.getConnection();
 				Query query = con.prepareQuery(QueryLanguage.SPARQL, queryString);
 				if (query instanceof TupleQuery) {
+					//System.out.println("TUPLE QUERY...");
 					TupleQuery tupleQuery = (TupleQuery) query;
-					tupleQuery.evaluate(new SPARQLResultsJSONWriter(System.out));
+					tupleQuery.setMaxExecutionTime(timeout);
+					//TupleQueryResult res = tupleQuery.evaluate();
+					//int count=0;
+					//System.out.println("DISPLAY TUPLE QUERY RESULT...");
+					//while (res.hasNext()) {
+					//	BindingSet row = res.next();
+					//	System.out.println(count+": "+ row);
+					//	count++;
+					//}
+					System.setOut(new PrintStream(new File(explanationfile)));
+					System.out.println(tupleQuery);
+					System.setOut(new PrintStream(new File(resultfile)));
+					long startTime = System.currentTimeMillis();
+					tupleQuery.evaluate(new SPARQLResultsCSVWriter(System.out));
+					long runTime = System.currentTimeMillis() - startTime;
+					System.setOut(new PrintStream(statfile));
+					System.out.println("query,engine,instance,batch,attempt,exec_time,ask,source_selection_time,planning_time");
+					System.out.println("injected.sparql,splendid,instance_id,batch_id,attempt_id,"+runTime+","+queryInfo.nbAskQuery.get()+","+provenancetime+","+queryInfo.planningTime);
+					//System.out.println("DONE !");
 				}
 				if (query instanceof GraphQuery) {
 					GraphQuery graphQuery = (GraphQuery) query;
@@ -198,12 +245,31 @@ public class SPLENDID {
 				e.printStackTrace();
 			} catch (MalformedQueryException e) {
 				e.printStackTrace();
+			} catch (QueryInterruptedException e) {
+				//LOGGER.info(queryFiles.get(0)+" timeout !");
+				try {
+					System.setOut(new PrintStream(statfile));
+					System.out.println("query,engine,instance,batch,attempt,exec_time,ask,source_selection_time,planning_time");
+					System.out.println("injected.sparql,splendid,instance_id,batch_id,attempt_id,timeout,"+queryInfo.nbAskQuery.get()+","+provenancetime+","+queryInfo.planningTime);
+				} catch (Exception error) {
+					LOGGER.error(error.getMessage());
+				}
 			} catch (QueryEvaluationException e) {
 				e.printStackTrace();
 			} catch (TupleQueryResultHandlerException e) {
 				e.printStackTrace();
 			} catch (RDFHandlerException e) {
 				e.printStackTrace();
+			} catch (Exception e) {
+				//LOGGER.info(queryFiles.get(0)+" failed with the following error: "+e.getMessage());
+				//e.printStackTrace();
+				try {
+					System.setOut(new PrintStream(statfile));
+					System.out.println("query,engine,instance,batch,attempt,exec_time,ask,source_selection_time,planning_time,ask_query");
+					System.out.println("injected.sparql,splendid,instance_id,batch_id,attempt_id,"+e.getMessage()+","+queryInfo.nbAskQuery.get()+","+provenancetime+","+queryInfo.planningTime);
+				} catch (Exception error) {
+					LOGGER.error(error.getMessage());
+				}
 			}
 			System.out.println("\n");
 		}
@@ -218,7 +284,9 @@ public class SPLENDID {
 	 */
 	private Model loadRepositoryConfig(String configFile) throws ConfigurationException {
 		File file = new File(configFile);
+		//System.out.println(file);
 		String baseURI = file.toURI().toString();
+		//System.out.println(baseURI);
 		RDFFormat format = Rio.getParserFormatForFileName(configFile).get();
 		if (format == null)
 			throw new ConfigurationException("unknown RDF format of repository config: " + file);
@@ -228,6 +296,7 @@ public class SPLENDID {
 			RDFParser parser = Rio.createParser(format);
 			parser.setRDFHandler(new StatementCollector(model));
 			parser.parse(new FileReader(file), baseURI);
+			//System.out.println(parser);
 			return model;
 			
 		} catch (UnsupportedRDFormatException e) {

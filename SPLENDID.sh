@@ -1,19 +1,17 @@
 # !/bin/sh
 
-cd engines/SPLENDID
-
 # USAGE: SPLENDID.sh <config> <query>
 #mainclass=de.uni_koblenz.west.evaluation.QueryProcessingEval
 #mainclassfile=src/de/uni_koblenz/west/evaluation/QueryProcessingEval.java
 
 # USAGE: SPLENDID.sh <config>
 # EXAMPLE: SPLENDID.sh eval/config.properties
-mainclass=de.uni_koblenz.west.evaluation.SourceSelectionEval
-mainclassfile=src/de/uni_koblenz/west/evaluation/SourceSelectionEval.java
+mainclass1=de.uni_koblenz.west.evaluation.SourceSelectionEval
+mainclassfile1=src/de/uni_koblenz/west/evaluation/SourceSelectionEval.java
 
 # USAGE: SPLENDID.sh <config> <query>
-#mainclass=de.uni_koblenz.west.splendid.SPLENDID
-#mainclassfile=src/de/uni_koblenz/west/splendid/SPLENDID.java
+mainclass2=de.uni_koblenz.west.splendid.SPLENDID
+mainclassfile2=src/de/uni_koblenz/west/splendid/SPLENDID.java
 
 firstserviceclassfile=src/de/uni_koblenz/west/splendid/config/VoidRepositoryFactory.java
 secondserviceclassfile=src/de/uni_koblenz/west/splendid/config/FederationSailFactory.java
@@ -21,13 +19,29 @@ secondserviceclassfile=src/de/uni_koblenz/west/splendid/config/FederationSailFac
 # set classpath
 classpath=./src:./resources
 
+config=$1
+properties=$2
+timeout=$3
+resultFile=$4
+provenanceFile=$5
+explainFile=$6
+statFile=$7
+query=$8
+
 # include all jar files in classpath
 for jar in lib/*.jar; do classpath=$classpath:$jar; done
 
-# build SPLENDID
-javac -d ./bin -cp $classpath $mainclassfile $firstserviceclassfile $secondserviceclassfile
+if [ $9 = true ]; then
+    # build SourceSelectionEval
+    javac -d ./bin -cp $classpath $mainclassfile1 $firstserviceclassfile $secondserviceclassfile
+    # build SPLENDID
+    javac -d ./bin -cp $classpath $mainclassfile2 $firstserviceclassfile $secondserviceclassfile
+fi
 
-# run SPLENDID
-java -cp $classpath:./bin $mainclass $*
-
-cd ../..
+if [ $10 = true ]; then
+    # run SourceSelectionEval
+    java -cp $classpath:./bin $mainclass1 $2 $5
+    sourceSelectionTime=$(echo `java -cp $classpath:./bin $mainclass1 $2 $5`)
+    # run SPLENDID
+    java -cp $classpath:./bin $mainclass2 $1 $sourceSelectionTime $3 $4 $6 $7 $8
+fi

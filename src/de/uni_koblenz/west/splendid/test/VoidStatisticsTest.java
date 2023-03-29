@@ -29,7 +29,7 @@ import junit.framework.Assert;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 import de.uni_koblenz.west.splendid.index.Graph;
 import de.uni_koblenz.west.splendid.statistics.VoidStatistics;
@@ -71,7 +71,7 @@ public class VoidStatisticsTest {
 		for (String statFile : STAT_FILES) {
 			URL url = VoidStatisticsTest.class.getResource(statFile);
 			try {
-				voidStats.load(new ValueFactoryImpl().createURI(url.getPath()), null);
+				voidStats.load(SimpleValueFactory.getInstance().createIRI(url.getPath()), null);
 			} catch (Exception e) {
 				throw new RuntimeException("can not load " + url, e);
 			}

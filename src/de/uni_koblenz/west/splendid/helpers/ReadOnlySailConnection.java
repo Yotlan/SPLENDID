@@ -25,8 +25,8 @@ import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.sail.SailException;
 import org.eclipse.rdf4j.sail.SailReadOnlyException;
-import org.eclipse.rdf4j.sail.helpers.SailBase;
-import org.eclipse.rdf4j.sail.helpers.SailConnectionBase;
+import org.eclipse.rdf4j.sail.helpers.AbstractSail;
+import org.eclipse.rdf4j.sail.helpers.AbstractSailConnection;
 //import org.eclipse.rdf4j.store.StoreException;
 
 /**
@@ -35,10 +35,10 @@ import org.eclipse.rdf4j.sail.helpers.SailConnectionBase;
  * 
  * @author Olaf Goerlitz
  */
-public abstract class ReadOnlySailConnection extends SailConnectionBase {
+public abstract class ReadOnlySailConnection extends AbstractSailConnection {
 	
 	// mandatory for Sesame 2 but obsolete in Sesame 3
-	public ReadOnlySailConnection(SailBase sailBase) {
+	public ReadOnlySailConnection(AbstractSail sailBase) {
 		// need sailBase reference for safely closing the connection
 		super(sailBase);
 	}

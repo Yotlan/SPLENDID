@@ -212,7 +212,7 @@ public class NXVoidGenerator {
 				handleStatement(quad[0], quad[1], quad[2]);
 			}
 
-			in.close();
+			//in.close();
 		} catch (IOException e) {
 			System.err.println("cannot read " + e.getMessage());
 		}

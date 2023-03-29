@@ -198,8 +198,10 @@ public class VoidStatistics implements RDFStatistics {
 		
 		List<String> bindings = evalQuery(query, "count");
 		
+		//System.out.println("BINDINGS: "+bindings);
 		// check result validity
 		if (bindings.size() == 0) {
+			//System.out.println("QUERY: "+query);
 			LOGGER.warn("found no count for " + Arrays.asList(vars));
 			return -1;
 		}
@@ -218,6 +220,8 @@ public class VoidStatistics implements RDFStatistics {
 	 */
 	private List<String> evalQuery(String query, String bindingName) {
 		try {
+			//Use generated void description instead of endpoint
+			//System.out.println("QUERY: "+query);
 			RepositoryConnection con = this.voidRepository.getConnection();
 			try {
 				TupleQuery tupleQuery = con.prepareTupleQuery(SPARQL, query);
@@ -228,6 +232,7 @@ public class VoidStatistics implements RDFStatistics {
 					while (result.hasNext()) {
 						bindings.add(result.next().getValue(bindingName).stringValue());
 					}
+					//System.out.println("RESULT: "+bindings);
 					return bindings;
 				} catch (QueryEvaluationException e) {
 					LOGGER.error("failed to handle query result from voiD repository, " + e.getMessage() + "\n" + query, e);
@@ -274,7 +279,7 @@ public class VoidStatistics implements RDFStatistics {
 		Set<Graph> sources = new HashSet<Graph>();
 		
 		if (pValue == null) {
-			LOGGER.info("found triple pattern with unbound predicate: selecting all sources");
+			//LOGGER.info("found triple pattern with unbound predicate: selecting all sources");
 			sources.addAll(getEndpoints());
 			return sources;
 		}
@@ -437,12 +442,13 @@ public class VoidStatistics implements RDFStatistics {
 					con.remove(dataset, ENDPOINT, null, voidIRI);
 					con.add(dataset, ENDPOINT, endpoint, voidIRI);
 					
-					LOGGER.info("set SPARQL endpoint '" + endpoint + "' for " + voidURL.getPath().replace(USER_DIR, ""));
+					//LOGGER.info("set SPARQL endpoint '" + endpoint + "' for " + voidURL.getPath().replace(USER_DIR, ""));
 					
 					return endpoint;
 				}
 				
 			} catch (RepositoryException e) {
+				System.out.println("RepositoryException");
 				e.printStackTrace();
 //			} catch (RDFParseException e) {
 //				e.printStackTrace();

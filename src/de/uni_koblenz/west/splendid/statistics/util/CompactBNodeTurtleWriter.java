@@ -32,10 +32,10 @@ import java.util.Set;
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.OWL;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
@@ -58,7 +58,7 @@ public class CompactBNodeTurtleWriter extends TurtleWriter {
 	
 	protected BNode pendingBNode;
 	protected Deque<Resource> storedSubjects = new ArrayDeque<Resource>();
-	protected Deque<URI> storedPredicates = new ArrayDeque<URI>();
+	protected Deque<IRI> storedPredicates = new ArrayDeque<IRI>();
 	protected Deque<Value> storedBNodes = new ArrayDeque<Value>();
 	protected Set<BNode> seenBNodes = new HashSet<BNode>();
 	
@@ -111,7 +111,7 @@ public class CompactBNodeTurtleWriter extends TurtleWriter {
 
 			} // otherwise write pending BNode object
 			else {
-				writeValue(pendingBNode);
+				writeValue(pendingBNode, false);
 			}
 			pendingBNode = null;
 		}
@@ -158,12 +158,12 @@ public class CompactBNodeTurtleWriter extends TurtleWriter {
 	 */
 	@Override
 	public void handleStatement(Statement st) throws RDFHandlerException {
-		if (!writingStarted) {
+		if (!isWritingStarted()) {
 			throw new RuntimeException("Document writing has not yet been started");
 		}
 
 		Resource subj = st.getSubject();
-		URI pred = st.getPredicate();
+		IRI pred = st.getPredicate();
 		Value obj = st.getObject();
 
 		try {
@@ -203,7 +203,7 @@ public class CompactBNodeTurtleWriter extends TurtleWriter {
 
 				// Write new subject:
 				writer.writeEOL();
-				writeResource(subj);
+				writeResource(subj, false);
 				writer.write(" ");
 				lastWrittenSubject = subj;
 
@@ -229,7 +229,7 @@ public class CompactBNodeTurtleWriter extends TurtleWriter {
 					seenBNodes.add(pendingBNode);
 				}
 			} else {
-				writeValue(obj);
+				writeValue(obj, false);
 			}
 			
 			// Don't close the line yet. The next triple statement may have
@@ -241,7 +241,7 @@ public class CompactBNodeTurtleWriter extends TurtleWriter {
 	}
 	
 	public void endRDF() throws RDFHandlerException {
-		if (!writingStarted) {
+		if (!isWritingStarted()) {
 			throw new RuntimeException("Document writing has not yet started");
 		}
 
@@ -265,14 +265,14 @@ public class CompactBNodeTurtleWriter extends TurtleWriter {
 		catch (IOException e) {
 			throw new RDFHandlerException(e);
 		}
-		finally {
-			writingStarted = false;
-		}
+		//finally {
+		//	writingStarted = false;
+		//}
 	}
 
 	public static void main(String[] args) {
 
-		ValueFactory vf = ValueFactoryImpl.getInstance();
+		ValueFactory vf = SimpleValueFactory.getInstance();
 		Writer writer = new StringWriter();
 		RDFWriter rdf = new CompactBNodeTurtleWriter(writer);
 		
@@ -293,14 +293,14 @@ public class CompactBNodeTurtleWriter extends TurtleWriter {
 			BNode sameThing = vf.createBNode();
 			BNode otherThing = vf.createBNode();
 			rdf.handleStatement(vf.createStatement(thing, RDFS.LABEL, vf.createLiteral("1")));
-			rdf.handleStatement(vf.createStatement(thing, RDF.TYPE, vf.createURI("http://test.org/Thing")));
+			rdf.handleStatement(vf.createStatement(thing, RDF.TYPE, vf.createIRI("http://test.org/Thing")));
 			rdf.handleStatement(vf.createStatement(thing, OWL.SAMEAS, sameThing));
 			rdf.handleStatement(vf.createStatement(sameThing, RDFS.LABEL, vf.createLiteral(1l)));
-			rdf.handleStatement(vf.createStatement(sameThing, RDF.TYPE, vf.createURI("http://test.org/Thing")));
+			rdf.handleStatement(vf.createStatement(sameThing, RDF.TYPE, vf.createIRI("http://test.org/Thing")));
 			rdf.handleStatement(vf.createStatement(sameThing, OWL.SAMEAS, thing));
 			rdf.handleStatement(vf.createStatement(sameThing, OWL.SAMEAS, otherThing));
 			rdf.handleStatement(vf.createStatement(otherThing, RDFS.LABEL, vf.createLiteral(1d)));
-			rdf.handleStatement(vf.createStatement(otherThing, RDF.TYPE, vf.createURI("http://test.org/Thing")));
+			rdf.handleStatement(vf.createStatement(otherThing, RDF.TYPE, vf.createIRI("http://test.org/Thing")));
 
 			rdf.endRDF();
 		} catch (RDFHandlerException e) {

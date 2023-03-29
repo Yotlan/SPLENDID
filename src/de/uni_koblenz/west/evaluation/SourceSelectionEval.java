@@ -1,5 +1,6 @@
 package de.uni_koblenz.west.evaluation;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.HashSet;
@@ -48,56 +49,70 @@ public class SourceSelectionEval {
 		this.output = config.getResultStream();
 	}
 	
-	public void testQueries(Configuration config) {
+	public void testQueries(Configuration config, String provenanceFile) {
 		
 		// table header
-		output.println("query;triples;#sources;sources");
-		
-		while (this.queries.hasNext()) {
-			Query query = this.queries.next();
-			SPARQLParser parser = new SPARQLParser();
-			TupleExpr expr;
-			try {
-				expr = parser.parseQuery(query.getQuery(), null).getTupleExpr();
-			} catch (MalformedQueryException e) {
-				LOGGER.error("cannot parse Query " + query.getName() + ": " + e.getMessage());
-				continue;
-			}
+		try {
+			PrintStream stdout = System.out;
+			//System.out.println("QUERIES: "+ this.queries.hasNext());
+			System.setOut(new PrintStream(new File(provenanceFile)));
+			System.out.println("query;triples;#sources;sources");
+			long startTime = System.currentTimeMillis();
 			
-			// group all triple patterns by assigned data source
-			List<MappedStatementPattern> mappedPatterns = finder.mapSources(StatementPatternCollector.process(expr), config);
-			List<List<MappedStatementPattern>> patterns = this.queryBuilder.getGroups(mappedPatterns);
+			while (this.queries.hasNext()) {
+				Query query = this.queries.next();
+				SPARQLParser parser = new SPARQLParser();
+				TupleExpr expr;
+				try {
+					expr = parser.parseQuery(query.getQuery(), null).getTupleExpr();
+					//LOGGER.info(expr.toString());
+				} catch (MalformedQueryException e) {
+					LOGGER.error("cannot parse Query " + query.getName() + ": " + e.getMessage());
+					continue;
+				}
+				
+				// group all triple patterns by assigned data source
+				List<MappedStatementPattern> mappedPatterns = finder.mapSources(StatementPatternCollector.process(expr), config);
+				List<List<MappedStatementPattern>> patterns = this.queryBuilder.getGroups(mappedPatterns);
 
-			Set<Graph> selectedSources = new HashSet<Graph>();
-			int queriesToSend = 0;
-			int patternToSend = 0;
-			for (List<MappedStatementPattern> pList : patterns) {
-				int patternCount = pList.size();
-				Set<Graph> sourceSet = pList.get(0).getSources();
-				selectedSources.addAll(sourceSet);
-				queriesToSend += sourceSet.size();
-				patternToSend += sourceSet.size() * patternCount;
-				output.println(query.getName() + ";" + pList + ";" + pList.get(0).getSources().size() + ";" + pList.get(0).getSources().toString());
+				Set<Graph> selectedSources = new HashSet<Graph>();
+				//int queriesToSend = 0;
+				//int patternToSend = 0;
+				for (List<MappedStatementPattern> pList : patterns) {
+					//int patternCount = pList.size();
+					Set<Graph> sourceSet = pList.get(0).getSources();
+					selectedSources.addAll(sourceSet);
+					//queriesToSend += sourceSet.size();
+					//patternToSend += sourceSet.size() * patternCount;
+					System.out.println(query.getName() + ";" + pList + ";" + pList.get(0).getSources().size() + ";" + pList.get(0).getSources().toString());
+				}
 			}
+			long runTime = System.currentTimeMillis() - startTime;
+			System.setOut(stdout);
+			System.out.println(runTime);
+			//output.close();
+		} catch (Exception e) {
+			System.err.println(e);
 		}
-		output.close();
 	}
 	
 	public static void main(String[] args) {
 		
 		// check arguments for name of configuration file
 		String configFile;
-		if (args.length == 0) {
+		if (args.length < 2) {
 			LOGGER.info("no config file specified; using default: " + CONFIG_FILE);
 			configFile = CONFIG_FILE;
 		} else {
 			configFile = args[0];
 		}
+		String provenanceFile = args[1];
 		
 		try {
 			Configuration config = Configuration.load(configFile);
 			SourceSelectionEval eval = new SourceSelectionEval(config);
-			eval.testQueries(config);
+			//System.out.println(configFile + "|" + provenanceFile);
+			eval.testQueries(config, provenanceFile);
 		} catch (IOException e) {
 			LOGGER.error("cannot load test config: " + e.getMessage());
 		} catch (ConfigurationException e) {

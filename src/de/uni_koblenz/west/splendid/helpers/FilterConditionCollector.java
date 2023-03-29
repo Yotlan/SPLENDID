@@ -26,14 +26,14 @@ import java.util.List;
 import org.eclipse.rdf4j.query.algebra.Filter;
 import org.eclipse.rdf4j.query.algebra.QueryModelNode;
 import org.eclipse.rdf4j.query.algebra.ValueExpr;
-import org.eclipse.rdf4j.query.algebra.helpers.QueryModelVisitorBase;
+import org.eclipse.rdf4j.query.algebra.helpers.AbstractQueryModelVisitor;
 
 /**
  * A QueryModelVisitor that collects filter conditions from a query model.
  * 
  * @author Olaf Goerlitz
  */
-public class FilterConditionCollector extends QueryModelVisitorBase<RuntimeException> {
+public class FilterConditionCollector extends AbstractQueryModelVisitor<RuntimeException> {
 
 	public static List<ValueExpr> process(QueryModelNode node) {
 		FilterConditionCollector collector = new FilterConditionCollector();

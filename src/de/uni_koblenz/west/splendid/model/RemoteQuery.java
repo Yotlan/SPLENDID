@@ -36,7 +36,7 @@ import de.uni_koblenz.west.splendid.index.Graph;
  * 
  * @author Olaf Goerlitz
  */
-@SuppressWarnings({"deprecation","removal"})
+//@SuppressWarnings({"deprecation","removal"})
 public class RemoteQuery extends UnaryTupleOperator {
 	
 	public RemoteQuery(TupleExpr expr) {

@@ -34,7 +34,7 @@ import org.eclipse.rdf4j.sail.config.SailConfigException;
  * 
  * @author Olaf Goerlitz
  */
-@SuppressWarnings({"deprecation","removal","dep-ann"})
+@SuppressWarnings({"deprecation","dep-ann"})
 public class SourceSelectorConfig extends AbstractSailConfig {
 	
 	/** @deprecated */
@@ -54,7 +54,6 @@ public class SourceSelectorConfig extends AbstractSailConfig {
 		return config;
 	}
 	
-	/** @deprecated */
 	public boolean isUseTypeStats() {
 		return this.useTypeStats;
 	}

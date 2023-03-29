@@ -33,7 +33,7 @@ import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.sail.config.SailConfigException;
 import org.eclipse.rdf4j.sail.config.SailImplConfig;
 import org.slf4j.Logger;
@@ -78,7 +78,7 @@ public abstract class AbstractSailConfig implements SailImplConfig {
 
 	@Override
 	public Resource export(Model model) {
-		ValueFactoryImpl vf = ValueFactoryImpl.getInstance();
+		SimpleValueFactory vf = SimpleValueFactory.getInstance();
 
 		BNode implNode = vf.createBNode();
 

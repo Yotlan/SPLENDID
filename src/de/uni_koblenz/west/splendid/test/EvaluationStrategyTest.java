@@ -28,15 +28,15 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.algebra.Join;
 import org.eclipse.rdf4j.query.algebra.StatementPattern;
 import org.eclipse.rdf4j.query.algebra.Var;
-import org.eclipse.rdf4j.query.algebra.evaluation.impl.EvaluationStrategyImpl;
+import org.eclipse.rdf4j.query.algebra.evaluation.impl.StrictEvaluationStrategy;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
@@ -66,17 +66,17 @@ public class EvaluationStrategyTest {
 	
 	private static final String PREFIX = "PREFIX ex: <http://ex.com/>\n";
 	
-	private static final ValueFactory vf = ValueFactoryImpl.getInstance();
+	private static final ValueFactory vf = SimpleValueFactory.getInstance();
 	
-	private static final URI PERSON = vf.createURI("http://ex.com/Person");
-	private static final URI LIKES = vf.createURI("http://ex.com/likes");
+	private static final IRI PERSON = vf.createIRI("http://ex.com/Person");
+	private static final IRI LIKES = vf.createIRI("http://ex.com/likes");
 	
-	private static final URI ALICE = vf.createURI("http://ex.com/Alice");
-	private static final URI BOB   = vf.createURI("http://ex.com/Bob");
+	private static final IRI ALICE = vf.createIRI("http://ex.com/Alice");
+	private static final IRI BOB   = vf.createIRI("http://ex.com/Bob");
 	
 	private Repository[] repositories;
 //	private SourceFinder sourceFinder;
-	private EvaluationStrategyImpl evalStrategy;
+	private StrictEvaluationStrategy evalStrategy;
 	private FederationSail federationSail;
 
 	private String query;
@@ -200,7 +200,7 @@ public class EvaluationStrategyTest {
 		StringReader reader = new StringReader(rdfData);
 		Repository rep = new SailRepository(new MemoryStore());
 		try {
-			rep.initialize();
+			rep.init();
 			rep.getConnection().add(reader, "http://ex.com/", RDFFormat.N3);
 //		} catch (StoreException e) {
 		} catch (RepositoryException e) {

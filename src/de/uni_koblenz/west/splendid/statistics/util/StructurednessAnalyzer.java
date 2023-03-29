@@ -34,7 +34,7 @@ import java.util.zip.ZipFile;
 
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.rio.RDFFormat;
@@ -42,7 +42,7 @@ import org.eclipse.rdf4j.rio.RDFHandlerException;
 import org.eclipse.rdf4j.rio.RDFParseException;
 import org.eclipse.rdf4j.rio.RDFParser;
 import org.eclipse.rdf4j.rio.Rio;
-import org.eclipse.rdf4j.rio.helpers.RDFHandlerBase;
+import org.eclipse.rdf4j.rio.helpers.AbstractRDFHandler;
 
 /**
  * Analyzes the structuredness of a dataset as described by Duan et al. in 
@@ -53,26 +53,26 @@ import org.eclipse.rdf4j.rio.helpers.RDFHandlerBase;
  * 
  * @author Olaf Goerlitz
  */
-public class StructurednessAnalyzer extends RDFHandlerBase {
+public class StructurednessAnalyzer extends AbstractRDFHandler {
 	
-	private final Map<URI, Map<URI, Integer>> predCountPerType = new HashMap<URI, Map<URI,Integer>>();
-	private final Map<URI, Integer> totalTypeCounts = new HashMap<URI, Integer>();
-	private final Map<URI, Integer> totalPredCounts = new HashMap<URI, Integer>();
+	private final Map<IRI, Map<IRI, Integer>> predCountPerType = new HashMap<IRI, Map<IRI,Integer>>();
+	private final Map<IRI, Integer> totalTypeCounts = new HashMap<IRI, Integer>();
+	private final Map<IRI, Integer> totalPredCounts = new HashMap<IRI, Integer>();
 	
-	private final Set<URI> typesOfCurrentSubject = new HashSet<URI>();
-	private final Set<URI> predsOfCurrentSubject = new HashSet<URI>();
+	private final Set<IRI> typesOfCurrentSubject = new HashSet<IRI>();
+	private final Set<IRI> predsOfCurrentSubject = new HashSet<IRI>();
 	private Resource lastSubject = null;
 	
-	private void count(Map<URI, Map<URI, Integer>> countMap, URI key, URI subkey) {
-		Map<URI, Integer> subcountMap = countMap.get(key);
+	private void count(Map<IRI, Map<IRI, Integer>> countMap, IRI key, IRI subkey) {
+		Map<IRI, Integer> subcountMap = countMap.get(key);
 		if (subcountMap == null) {
-			subcountMap = new HashMap<URI, Integer>();
+			subcountMap = new HashMap<IRI, Integer>();
 			countMap.put(key, subcountMap);
 		}
 		count(subcountMap, subkey);
 	}
 	
-	private void count(Map<URI, Integer> countMap, URI key) {
+	private void count(Map<IRI, Integer> countMap, IRI key) {
 		Integer count = countMap.get(key);
 		if (count == null) {
 			countMap.put(key, 1);
@@ -88,13 +88,13 @@ public class StructurednessAnalyzer extends RDFHandlerBase {
 	 */
 	private void storeStatement(Statement st) {
 		
-		URI predicate = st.getPredicate();
+		IRI predicate = st.getPredicate();
 		Value object = st.getObject();
 		
 		// check for type statement
 		if (RDF.TYPE.equals(predicate)) {
-			typesOfCurrentSubject.add((URI) object);
-			count(totalTypeCounts, (URI) object);
+			typesOfCurrentSubject.add((IRI) object);
+			count(totalTypeCounts, (IRI) object);
 		} else {
 			predsOfCurrentSubject.add(predicate);
 			count(totalPredCounts, predicate);
@@ -112,8 +112,8 @@ public class StructurednessAnalyzer extends RDFHandlerBase {
 			return;
 		
 		// count predicates for all types
-		for (URI type : typesOfCurrentSubject) {
-			for (URI pred : predsOfCurrentSubject) {
+		for (IRI type : typesOfCurrentSubject) {
+			for (IRI pred : predsOfCurrentSubject) {
 				count(predCountPerType, type, pred);
 			}
 		}
@@ -125,19 +125,19 @@ public class StructurednessAnalyzer extends RDFHandlerBase {
 	
 	public double computeCoverage() {
 		
-		Map<URI, Double> typeCoverage = new HashMap<URI, Double>();
-		Map<URI, Integer> wtCovFactor = new HashMap<URI, Integer>();
+		Map<IRI, Double> typeCoverage = new HashMap<IRI, Double>();
+		Map<IRI, Integer> wtCovFactor = new HashMap<IRI, Integer>();
 		
 		long coverageSum = 0;
 		
 		// compute coverage
-		for (URI type : predCountPerType.keySet()) {
+		for (IRI type : predCountPerType.keySet()) {
 
 			long predCountSum = 0;
-			Map<URI, Integer> predCounts = predCountPerType.get(type);
+			Map<IRI, Integer> predCounts = predCountPerType.get(type);
 			
 			// compute sum of all predicate counts
-			for (URI pred : predCounts.keySet()) {
+			for (IRI pred : predCounts.keySet()) {
 				predCountSum += predCounts.get(pred);
 			}
 			
@@ -152,7 +152,7 @@ public class StructurednessAnalyzer extends RDFHandlerBase {
 		
 		// compute weighted coverage and coherence
 		double coherence = 0;
-		for (URI type : predCountPerType.keySet()) {
+		for (IRI type : predCountPerType.keySet()) {
 			double weightedCov = (double) wtCovFactor.get(type) / coverageSum;
 			coherence += weightedCov * typeCoverage.get(type);
 		}
@@ -231,6 +231,11 @@ public class StructurednessAnalyzer extends RDFHandlerBase {
 			}
 			
 			processInputStream(zf.getInputStream(entry), entry.getName());
+			try {
+				zf.close();
+			} catch (Exception e) {
+				System.out.println("Can't close ZipFile: "+zf.getName());
+			}
 		} 
 		
 		// process data stream of file
@@ -245,7 +250,7 @@ public class StructurednessAnalyzer extends RDFHandlerBase {
 		System.out.println("processing " + filename);
 		
 		// identify parser format
-		RDFFormat format = Rio.getParserFormatForFileName(filename);
+		RDFFormat format = Rio.getParserFormatForFileName(filename).get();
 		if (format == null) {
 			System.err.println("can not identify RDF format for: " + filename);
 			System.exit(1);
@@ -255,7 +260,7 @@ public class StructurednessAnalyzer extends RDFHandlerBase {
 		StructurednessAnalyzer handler = new StructurednessAnalyzer();
 		RDFParser parser = Rio.createParser(format);
 		parser.setRDFHandler(handler);
-		parser.setStopAtFirstError(false);
+		//parser.setStopAtFirstError(false);
 		
 		try {
 			parser.parse(input, "");

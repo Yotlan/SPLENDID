@@ -40,13 +40,14 @@ import de.uni_koblenz.west.splendid.model.BasicGraphPatternExtractor;
 import de.uni_koblenz.west.splendid.model.MappedStatementPattern;
 import de.uni_koblenz.west.splendid.model.SubQueryBuilder;
 import de.uni_koblenz.west.splendid.sources.SourceSelector;
+//import de.uni_koblenz.west.splendid.test.config.Configuration;
 
 /**
  * Base functionality for federated query optimizers
  * 
  * @author Olaf Goerlitz
  */
-@SuppressWarnings({"deprecation","removal"})
+//@SuppressWarnings({"deprecation","removal"})
 public abstract class AbstractFederationOptimizer implements QueryOptimizer {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFederationOptimizer.class);

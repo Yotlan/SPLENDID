@@ -57,6 +57,7 @@ public class IndexAskSelector extends AskSelector {
 	@Override
 	protected Set<Graph> getSources(StatementPattern pattern, Configuration config) {
 		Set<Graph> sources = this.indexSel.getSources(pattern, config);
+		//System.out.println("IndexAskSelector Config: "+config);
 		return getSources(pattern, sources, config);
 	}
 	

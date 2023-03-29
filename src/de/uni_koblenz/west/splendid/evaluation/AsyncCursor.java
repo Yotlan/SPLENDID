@@ -23,9 +23,9 @@ package de.uni_koblenz.west.splendid.evaluation;
 import org.eclipse.rdf4j.common.iteration.CloseableIteration;
 import org.eclipse.rdf4j.common.iteration.LookAheadIteration;
 
-import java.util.concurrent.Callable;
+//import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
+//import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 import org.eclipse.rdf4j.query.QueryEvaluationException;

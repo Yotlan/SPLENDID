@@ -30,9 +30,9 @@ import org.eclipse.rdf4j.repository.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.uni_koblenz.west.splendid.FederationSail;
+//import de.uni_koblenz.west.splendid.FederationSail;
 import de.uni_koblenz.west.splendid.helpers.QueryExecutor;
-import de.uni_koblenz.west.splendid.sources.SourceSelector;
+//import de.uni_koblenz.west.splendid.sources.SourceSelector;
 import de.uni_koblenz.west.splendid.test.config.Configuration;
 import de.uni_koblenz.west.splendid.test.config.ConfigurationException;
 import de.uni_koblenz.west.splendid.test.config.Query;
@@ -49,7 +49,7 @@ public class SourceFinderTest {
 	
 	private static Repository REPOSITORY;
 	private static Iterator<Query> QUERIES;
-	private static SourceSelector finder;
+	//private static SourceSelector finder;
 	
 	public static void main(String[] args) {
 		
@@ -73,8 +73,8 @@ public class SourceFinderTest {
 			REPOSITORY = config.createRepository();
 			QUERIES = config.getQueryIterator();
 			// get finder from configuration
-			FederationSail fedSail = config.getFederationSail();
-			finder = fedSail.getSourceSelector();
+			//FederationSail fedSail = config.getFederationSail();
+			//finder = fedSail.getSourceSelector();
 //			System.out.println("finder rdf:type=" + finder.isHandleRDFType());
 		} catch (IOException e) {
 			LOGGER.error("cannot load test config: " + e.getMessage());

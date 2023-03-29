@@ -24,7 +24,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileFilter;
+//import java.io.FileFilter;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -33,7 +33,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
-import org.apache.commons.io.filefilter.WildcardFileFilter;
+//import org.apache.commons.io.filefilter.WildcardFileFilter;
 
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.impl.DynamicModel;
@@ -88,7 +88,7 @@ public class Configuration {
 	private Configuration(String fileName) throws IOException {
 		this.cfgFile = new File(fileName).getAbsoluteFile();
 		this.props.load(new FileReader(this.cfgFile));
-		LOGGER.info("loaded configuration from " + cfgFile);
+		//LOGGER.info("loaded configuration from " + cfgFile);
 	}
 	
 	/**
@@ -141,7 +141,7 @@ public class Configuration {
 				throw new ConfigurationException("Unsupported repository type: " + implConf.getType() + " in repository config");
 			}
 			this.repository = factory.getRepository(implConf);
-			this.repository.initialize();
+			this.repository.init();
 			return this.repository;
 		} catch (RepositoryConfigException e) {
 			throw new ConfigurationException("cannot create repository: " + e.getMessage());
@@ -272,6 +272,7 @@ public class Configuration {
 		while((input = r.readLine()) != null) {
 			buffer.append(input).append("\n");
 		}
+		r.close();
 		return buffer.toString();
 	}
 	

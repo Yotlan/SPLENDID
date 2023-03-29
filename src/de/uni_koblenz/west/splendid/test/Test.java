@@ -55,7 +55,7 @@ public class Test {
 	public Test() {
 		rep = new SailRepository(new MemoryStore());
 		try {
-			rep.initialize();
+			rep.init();
 		} catch (RepositoryException e) {
 			throw new RuntimeException("initialization of statistics repository failed", e);
 		}

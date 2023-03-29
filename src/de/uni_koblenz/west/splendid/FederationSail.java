@@ -32,7 +32,7 @@ import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.sail.SailConnection;
 import org.eclipse.rdf4j.sail.SailException;
 import org.eclipse.rdf4j.sail.config.SailConfigException;
-import org.eclipse.rdf4j.sail.helpers.SailBase;
+import org.eclipse.rdf4j.sail.helpers.AbstractSail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +52,7 @@ import de.uni_koblenz.west.splendid.statistics.VoidStatistics;
  * @author Olaf Goerlitz
  * @see org.eclipse.rdf4j.sail.federation.Federation
  */
-public class FederationSail extends SailBase {
+public class FederationSail extends AbstractSail {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(FederationSail.class);
 	

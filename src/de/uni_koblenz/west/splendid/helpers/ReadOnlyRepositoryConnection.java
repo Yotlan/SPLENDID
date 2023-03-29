@@ -24,11 +24,11 @@ package de.uni_koblenz.west.splendid.helpers;
 //import org.eclipse.rdf4j.store.Isolation;
 //import org.eclipse.rdf4j.store.StoreException;
 import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.RepositoryReadOnlyException;
-import org.eclipse.rdf4j.repository.base.RepositoryConnectionBase;
+import org.eclipse.rdf4j.repository.base.AbstractRepositoryConnection;
 
 import de.uni_koblenz.west.splendid.VoidRepository;
 
@@ -38,7 +38,7 @@ import de.uni_koblenz.west.splendid.VoidRepository;
  * 
  * @author Olaf Goerlitz
  */
-public abstract class ReadOnlyRepositoryConnection extends RepositoryConnectionBase {
+public abstract class ReadOnlyRepositoryConnection extends AbstractRepositoryConnection {
 	
 	/**
 	 * Creates a new read-only RepositoryConnection.
@@ -82,12 +82,12 @@ public abstract class ReadOnlyRepositoryConnection extends RepositoryConnectionB
 	}
 	
 //	public void add(Resource subject, URI predicate, Value object, Resource... contexts) throws StoreException {  // Sesame 3
-	protected void addWithoutCommit(Resource subject, URI predicate, Value object, Resource... contexts) throws RepositoryException {  // Sesame 2
+	protected void addWithoutCommit(Resource subject, IRI predicate, Value object, Resource... contexts) throws RepositoryException {  // Sesame 2
 		throw new RepositoryReadOnlyException();
 	}
 	
 //	public void removeMatch(Resource subject, URI predicate, Value object, Resource... contexts) throws StoreException {  // Sesame 3
-	protected void removeWithoutCommit(Resource subject, URI predicate, Value object, Resource... contexts) throws RepositoryException {  // Sesame 2
+	protected void removeWithoutCommit(Resource subject, IRI predicate, Value object, Resource... contexts) throws RepositoryException {  // Sesame 2
 		throw new RepositoryReadOnlyException();
 	}
 	

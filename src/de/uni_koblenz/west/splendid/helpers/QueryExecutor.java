@@ -27,14 +27,18 @@ import org.eclipse.rdf4j.common.iteration.EmptyIteration;
 import org.eclipse.rdf4j.common.iteration.LookAheadIteration;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+//import java.io.UnsupportedEncodingException;
 import java.net.ConnectException;
-import java.net.URLEncoder;
+//import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
+import java.io.InputStream;
+import java.io.File;
+import java.io.FileInputStream;
 
 //import org.eclipse.rdf4j.cursor.Cursor;
 //import org.eclipse.rdf4j.cursor.DelegatingCursor;
@@ -51,7 +55,7 @@ import org.eclipse.rdf4j.query.TupleQuery;
 import org.eclipse.rdf4j.query.TupleQueryResult;
 import org.eclipse.rdf4j.query.UnsupportedQueryLanguageException;
 //import org.eclipse.rdf4j.query.algebra.QueryModel;
-import org.eclipse.rdf4j.query.algebra.StatementPattern;
+//import org.eclipse.rdf4j.query.algebra.StatementPattern;
 import org.eclipse.rdf4j.query.algebra.TupleExpr;
 import org.eclipse.rdf4j.query.algebra.evaluation.EvaluationStrategy;
 import org.eclipse.rdf4j.query.impl.EmptyBindingSet;
@@ -60,9 +64,9 @@ import org.eclipse.rdf4j.query.parser.sparql.SPARQLParser;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
-import org.eclipse.rdf4j.repository.http.HTTPRepository;
-import org.eclipse.rdf4j.repository.http.HTTPTupleQuery;
-import org.eclipse.rdf4j.repository.sparql.SPARQLConnection;
+//import org.eclipse.rdf4j.repository.http.HTTPRepository;
+//import org.eclipse.rdf4j.repository.http.HTTPTupleQuery;
+//import org.eclipse.rdf4j.repository.sparql.SPARQLConnection;
 import org.eclipse.rdf4j.repository.sparql.SPARQLRepository;
 import org.eclipse.rdf4j.sail.Sail;
 import org.eclipse.rdf4j.sail.SailConnection;
@@ -71,6 +75,7 @@ import org.eclipse.rdf4j.sail.SailException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import de.uni_koblenz.west.splendid.test.config.Configuration;
+import de.uni_koblenz.west.splendid.SPLENDID;
 
 /**
  * Utility class for conveniently executing SPARQL queries.
@@ -202,8 +207,11 @@ public final class QueryExecutor {
 	
 	public static boolean ask(String target, String triplePattern, Configuration config) {
 		String query = "ASK { " + "GRAPH <"+ target +"> { "+ triplePattern +" }" + " }";
+		//System.out.println("ASK QUERY: "+query);
 		try {
 			try {
+				//System.out.println("ASK Config: "+config);
+				//System.out.println("RESULT: "+prepareBooleanQuery(query, target, config).evaluate());
 				return prepareBooleanQuery(query, target, config).evaluate();
 			} catch (QueryEvaluationException e) {  // Sesame 3: StoreException
 				// first check for network connection error
@@ -249,6 +257,13 @@ public final class QueryExecutor {
 //	public static Cursor<BindingSet> eval(String endpoint, String query) {
 	public static CloseableIteration<BindingSet, QueryEvaluationException> eval(String endpoint, String query, BindingSet bindings) {
 		try {
+			//System.out.println("RESULT OF "+query);
+			//System.out.println("========================\n");
+			//System.exit(1);
+			//for (BindingSet result: asList(wrapResult(prepareTupleQuery(query, endpoint, bindings), endpoint, query))) {
+			//	System.out.println("- "+result);
+			//}
+			//System.out.println("\n========================");
 			return wrapResult(prepareTupleQuery(query, endpoint, bindings), endpoint, query);
 		} catch (MalformedQueryException e) {
 			LOGGER.error("Malformed query:\n" + query, e.getMessage());
@@ -258,6 +273,7 @@ public final class QueryExecutor {
 			LOGGER.error("failed to evaluate query on endpoint: " + endpoint + "\n" + query, e);
 //			return EmptyCursor.getInstance();
 			return new EmptyIteration<BindingSet, QueryEvaluationException>();
+			//throw new RuntimeException("Failed to evaluate query on endpoint: "+endpoint+"\n"+query, e);
 		}
 	}
 	
@@ -274,11 +290,28 @@ public final class QueryExecutor {
 		try {
 			SPARQLRepository http = httpMap.get(endpoint);
 			if (http == null) {
-				http = new SPARQLRepository(config.getSparqlEndpoint());
-				httpMap.put(endpoint, http);
+				if (config != null) {
+					//System.out.println("Config: "+config);
+					//System.out.println("Endpoint: "+endpoint);
+					http = new SPARQLRepository(config.getSparqlEndpoint());
+					httpMap.put(endpoint, http);
+				} else {
+					try {
+						Properties prop = new Properties();          
+						File configFile = new File("eval/sail-config/config.properties");
+						InputStream stream = new FileInputStream(configFile);
+						prop.load(stream);
+						//System.out.println("localhost: "+prop.getProperty("sparql.endpoint"));
+						http = new SPARQLRepository(prop.getProperty("sparql.endpoint"));
+						httpMap.put(endpoint, http);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
 			}
-			Map<String, String> headers =new HashMap<>();
+			Map<String, String> headers =new HashMap<String, String>();
 			headers.put("Accept", "application/sparql-results+json");
+			//System.out.println(http);
 			http.setAdditionalHttpHeaders(headers);
 
 			return http.getConnection().prepareBooleanQuery(QueryLanguage.SPARQL, query);

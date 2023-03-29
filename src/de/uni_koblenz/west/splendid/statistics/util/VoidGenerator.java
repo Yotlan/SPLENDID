@@ -20,10 +20,10 @@ import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFHandlerException;
@@ -31,23 +31,23 @@ import org.eclipse.rdf4j.rio.RDFParseException;
 import org.eclipse.rdf4j.rio.RDFParser;
 import org.eclipse.rdf4j.rio.RDFWriter;
 import org.eclipse.rdf4j.rio.Rio;
-import org.eclipse.rdf4j.rio.helpers.RDFHandlerBase;
+import org.eclipse.rdf4j.rio.helpers.AbstractRDFHandler;
 
 import de.uni_koblenz.west.splendid.vocabulary.VOID2;
 
-public class VoidGenerator extends RDFHandlerBase {
+public class VoidGenerator extends AbstractRDFHandler {
 	
-	private final Map<URI, Integer> typeCountMap = new HashMap<URI, Integer>();
-	private final Set<URI> predicates = new HashSet<URI>();
+	private final Map<IRI, Integer> typeCountMap = new HashMap<IRI, Integer>();
+	private final Set<IRI> predicates = new HashSet<IRI>();
 	private final Set<Resource> distSubject = new HashSet<Resource>();
 	private final Set<Value> distObject = new HashSet<Value>();
 	
-	private URI lastPredicate = null;
+	private IRI lastPredicate = null;
 	private long predCount;
 	private long tripleCount;
 	private long entityCount;
 	
-	private ValueFactory vf = ValueFactoryImpl.getInstance();
+	private ValueFactory vf = SimpleValueFactory.getInstance();
 	private BNode dataset = vf.createBNode();
 	
 	private final RDFWriter writer = new CompactBNodeTurtleWriter(System.out);
@@ -60,7 +60,7 @@ public class VoidGenerator extends RDFHandlerBase {
 	
 	// ------------------------------------------------------------------------
 	
-	private void countType(URI type) {
+	private void countType(IRI type) {
 		Integer count = typeCountMap.get(type);
 		if (count == null) {
 			typeCountMap.put(type, 1);
@@ -76,13 +76,13 @@ public class VoidGenerator extends RDFHandlerBase {
 	 */
 	private void storeStatement(Statement st) {
 		
-		URI predicate = st.getPredicate();
+		IRI predicate = st.getPredicate();
 		predCount++;
 		
 		// check for type statement
 		if (RDF.TYPE.equals(predicate)) {
 			
-			countType((URI) st.getObject());
+			countType((IRI) st.getObject());
 			entityCount++;
 		}
 		
@@ -113,17 +113,17 @@ public class VoidGenerator extends RDFHandlerBase {
 		predCount = 0;
 	}
 	
-	private void writePredicateStatToVoid(URI predicate, long pCount, int distS, int distO) {
+	private void writePredicateStatToVoid(IRI predicate, long pCount, int distS, int distO) {
 		BNode propPartition = vf.createBNode();
 		Literal count = vf.createLiteral(String.valueOf(pCount));
 		Literal distinctS  = vf.createLiteral(String.valueOf(distS));
 		Literal distinctO  = vf.createLiteral(String.valueOf(distO));
 		try {
-			writer.handleStatement(vf.createStatement(dataset, vf.createURI(VOID2.propertyPartition.toString()), propPartition));
-			writer.handleStatement(vf.createStatement(propPartition, vf.createURI(VOID2.property.toString()), predicate));
-			writer.handleStatement(vf.createStatement(propPartition, vf.createURI(VOID2.triples.toString()), count));
-			writer.handleStatement(vf.createStatement(propPartition, vf.createURI(VOID2.distinctSubjects.toString()), distinctS));
-			writer.handleStatement(vf.createStatement(propPartition, vf.createURI(VOID2.distinctObjects.toString()), distinctO));
+			writer.handleStatement(vf.createStatement(dataset, vf.createIRI(VOID2.propertyPartition.toString()), propPartition));
+			writer.handleStatement(vf.createStatement(propPartition, vf.createIRI(VOID2.property.toString()), predicate));
+			writer.handleStatement(vf.createStatement(propPartition, vf.createIRI(VOID2.triples.toString()), count));
+			writer.handleStatement(vf.createStatement(propPartition, vf.createIRI(VOID2.distinctSubjects.toString()), distinctS));
+			writer.handleStatement(vf.createStatement(propPartition, vf.createIRI(VOID2.distinctObjects.toString()), distinctO));
 		} catch (RDFHandlerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -134,9 +134,9 @@ public class VoidGenerator extends RDFHandlerBase {
 		BNode classPartition = vf.createBNode();
 		Literal count = vf.createLiteral(String.valueOf(tCount));
 		try {
-			writer.handleStatement(vf.createStatement(dataset, vf.createURI(VOID2.classPartition.toString()), classPartition));
-			writer.handleStatement(vf.createStatement(classPartition, vf.createURI(VOID2.clazz.toString()), type));
-			writer.handleStatement(vf.createStatement(classPartition, vf.createURI(VOID2.entities.toString()), count));
+			writer.handleStatement(vf.createStatement(dataset, vf.createIRI(VOID2.classPartition.toString()), classPartition));
+			writer.handleStatement(vf.createStatement(classPartition, vf.createIRI(VOID2.clazz.toString()), type));
+			writer.handleStatement(vf.createStatement(classPartition, vf.createIRI(VOID2.entities.toString()), count));
 		} catch (RDFHandlerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -145,10 +145,10 @@ public class VoidGenerator extends RDFHandlerBase {
 	
 	private void writeGeneralStats() {
 		try {
-			writer.handleStatement(vf.createStatement(dataset, vf.createURI(VOID2.triples.toString()), vf.createLiteral(String.valueOf(tripleCount))));
-			writer.handleStatement(vf.createStatement(dataset, vf.createURI(VOID2.properties.toString()), vf.createLiteral(String.valueOf(predicates.size()))));
-			writer.handleStatement(vf.createStatement(dataset, vf.createURI(VOID2.classes.toString()), vf.createLiteral(String.valueOf(typeCountMap.size()))));
-			writer.handleStatement(vf.createStatement(dataset, vf.createURI(VOID2.entities.toString()), vf.createLiteral(String.valueOf(entityCount))));
+			writer.handleStatement(vf.createStatement(dataset, vf.createIRI(VOID2.triples.toString()), vf.createLiteral(String.valueOf(tripleCount))));
+			writer.handleStatement(vf.createStatement(dataset, vf.createIRI(VOID2.properties.toString()), vf.createLiteral(String.valueOf(predicates.size()))));
+			writer.handleStatement(vf.createStatement(dataset, vf.createIRI(VOID2.classes.toString()), vf.createLiteral(String.valueOf(typeCountMap.size()))));
+			writer.handleStatement(vf.createStatement(dataset, vf.createIRI(VOID2.entities.toString()), vf.createLiteral(String.valueOf(entityCount))));
 		} catch (RDFHandlerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -167,7 +167,7 @@ public class VoidGenerator extends RDFHandlerBase {
 		writer.handleNamespace("void", "http://rdfs.org/ns/void#");
 		
 		// general void information
-		writer.handleStatement(vf.createStatement(dataset, RDF.TYPE, vf.createURI(VOID2.Dataset.toString())));
+		writer.handleStatement(vf.createStatement(dataset, RDF.TYPE, vf.createIRI(VOID2.Dataset.toString())));
 	}
 	
 	
@@ -191,10 +191,10 @@ public class VoidGenerator extends RDFHandlerBase {
 		processStoredStatements();
 		
 		// write type statistics
-		List<URI> types = new ArrayList<URI>(typeCountMap.keySet());
+		List<IRI> types = new ArrayList<IRI>(typeCountMap.keySet());
 		Collections.sort(types, VAL_COMP);
-		for (URI uri : types) {
-			writeTypeStatToVoid(uri, typeCountMap.get(uri));
+		for (IRI IRI : types) {
+			writeTypeStatToVoid(IRI, typeCountMap.get(IRI));
 		}
 
 		// TODO: write general statistics
@@ -254,6 +254,12 @@ public class VoidGenerator extends RDFHandlerBase {
 			}
 			
 			processInputStream(zf.getInputStream(entry), entry.getName());
+
+			try {
+				zf.close();
+			} catch (Exception e) {
+				System.out.println("Can't close ZipFile: "+zf.getName());
+			}
 		} 
 		
 		// process data stream of file
@@ -268,7 +274,7 @@ public class VoidGenerator extends RDFHandlerBase {
 		System.err.println("processing " + filename);
 		
 		// identify parser format
-		RDFFormat format = Rio.getParserFormatForFileName(filename);
+		RDFFormat format = Rio.getParserFormatForFileName(filename).get();
 		if (format == null) {
 			System.err.println("can not identify RDF format for: " + filename);
 			System.exit(1);
@@ -278,7 +284,7 @@ public class VoidGenerator extends RDFHandlerBase {
 		VoidGenerator handler = new VoidGenerator();
 		RDFParser parser = Rio.createParser(format);
 //		parser.setVerifyData(false);
-		parser.setStopAtFirstError(false);
+		//parser.setStopAtFirstError(false);
 		parser.setRDFHandler(handler);
 		
 		try {

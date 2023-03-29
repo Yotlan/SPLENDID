@@ -26,14 +26,14 @@ import java.util.Map;
 import org.eclipse.rdf4j.query.algebra.Filter;
 import org.eclipse.rdf4j.query.algebra.TupleExpr;
 import org.eclipse.rdf4j.query.algebra.UnaryTupleOperator;
-import org.eclipse.rdf4j.query.algebra.helpers.QueryModelVisitorBase;
+import org.eclipse.rdf4j.query.algebra.helpers.AbstractQueryModelVisitor;
 
 import de.uni_koblenz.west.splendid.model.RemoteQuery;
 
 /**
  * @author Olaf Goerlitz
  */
-public abstract class AbstractCardinalityEstimator extends QueryModelVisitorBase<RuntimeException> implements ModelEvaluator {
+public abstract class AbstractCardinalityEstimator extends AbstractQueryModelVisitor<RuntimeException> implements ModelEvaluator {
 
 	protected Map<TupleExpr, Double> cardIndex = new HashMap<TupleExpr, Double>();
 	

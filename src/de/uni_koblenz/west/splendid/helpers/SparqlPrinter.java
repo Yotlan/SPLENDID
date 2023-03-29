@@ -27,12 +27,18 @@ import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.query.algebra.BinaryTupleOperator;
 import org.eclipse.rdf4j.query.algebra.Compare;
 import org.eclipse.rdf4j.query.algebra.Filter;
+import org.eclipse.rdf4j.query.algebra.FunctionCall;
 import org.eclipse.rdf4j.query.algebra.Join;
 import org.eclipse.rdf4j.query.algebra.QueryModelNode;
+import org.eclipse.rdf4j.query.algebra.Regex;
 import org.eclipse.rdf4j.query.algebra.StatementPattern;
+import org.eclipse.rdf4j.query.algebra.Str;
 import org.eclipse.rdf4j.query.algebra.ValueConstant;
 import org.eclipse.rdf4j.query.algebra.Var;
-import org.eclipse.rdf4j.query.algebra.helpers.QueryModelVisitorBase;
+import org.eclipse.rdf4j.query.algebra.helpers.AbstractQueryModelVisitor;
+
+import de.uni_koblenz.west.splendid.model.MappedStatementPattern;
+import de.uni_koblenz.west.splendid.model.RemoteQuery;
 
 /**
  * Generates the SPARQL representation for a query model.
@@ -41,12 +47,14 @@ import org.eclipse.rdf4j.query.algebra.helpers.QueryModelVisitorBase;
  * 
  * @author Olaf Goerlitz.
  */
-public class SparqlPrinter extends QueryModelVisitorBase<RuntimeException> {
+public class SparqlPrinter extends AbstractQueryModelVisitor<RuntimeException> {
 	
 	private static final SparqlPrinter printer = new SparqlPrinter();
 	
 	private StringBuffer buffer = new StringBuffer();
 	private String indent = "  ";
+	private boolean secondFilterParam = false;
+	private boolean regexFilter = false;
 	
 	/**
 	 * Prints the SPARQL query starting with the given query model node.
@@ -87,13 +95,24 @@ public class SparqlPrinter extends QueryModelVisitorBase<RuntimeException> {
 //		for (TupleExpr expr : node.getArgs()) {
 //			expr.visit(this);
 //		}
+
 		node.getArg().visit(this);
 			
 		// then the applied filters conditions
 		buffer.append(indent);
-		buffer.append("FILTER (");
-		node.getCondition().visit(this);
-		buffer.append(")\n");
+		if (node.getCondition().toString().contains("Regex")) {
+			regexFilter = true;
+			buffer.append("FILTER REGEX (");
+			node.getCondition().visit(this);
+			buffer.append(")");
+			secondFilterParam = false;
+			regexFilter = false;
+		} else {
+			regexFilter = false;
+			buffer.append("FILTER (");
+			node.getCondition().visit(this);
+			buffer.append(")\n");
+		}
 	}
 	
 	@Override
@@ -105,25 +124,107 @@ public class SparqlPrinter extends QueryModelVisitorBase<RuntimeException> {
 	
 	@Override
 	public void meet(Var node) throws RuntimeException {
-		if (node.hasValue()) {
-			// bound variable (constant)
-			Value value = node.getValue();
-			if (value instanceof IRI)
-				buffer.append("<").append(value).append(">");
-			else
-				buffer.append(value);
+		if (regexFilter) {
+			//System.out.println(node.getParentNode().getSignature());
+			boolean isApplyFunction = false;
+			QueryModelNode applyNode = null;
+			boolean isCastStr = false;
+			QueryModelNode isInRegexFilter = node;
+			while(!(isInRegexFilter.getParentNode() instanceof MappedStatementPattern) && !(isInRegexFilter.getParentNode() instanceof Regex)) {
+				//System.out.println(isInRegexFilter.getSignature());
+				if (isInRegexFilter.getParentNode() instanceof FunctionCall) {
+					isApplyFunction = true;
+					applyNode = isInRegexFilter.getParentNode();
+				}
+				if (isInRegexFilter.getParentNode() instanceof Str) {
+					isCastStr = true;
+				}
+				isInRegexFilter = isInRegexFilter.getParentNode();
+			}
+			//System.out.println(isInRegexFilter.getParentNode().getSignature());
+			if (isApplyFunction) {
+				if (applyNode.getSignature().contains("lower-case")) {
+					buffer.append("LCASE(");
+				} else if (applyNode.getSignature().contains("upper-case")) {
+					buffer.append("UCASE(");
+				} else if (applyNode.getSignature().contains("string-length")) {
+					buffer.append("STRLEN(");
+				} else if (applyNode.getSignature().contains("encode-for-uri")) {
+					buffer.append("ENCODE_FOR_URI(");
+				} else {
+					throw new RuntimeException("Not handle the following apply function: "+applyNode.getSignature());
+				}
+			}
+			if (isCastStr) {
+				buffer.append("STR(");
+			}
+			if (node.hasValue()) {
+				// bound variable (constant)
+				Value value = node.getValue();
+				if (value instanceof IRI)
+					buffer.append("<").append(value).append(">");
+				else
+					buffer.append(value);
+			} else {
+				// unbound variable
+				if (node.isAnonymous())
+					buffer.append("[]");
+				else
+					buffer.append("?").append(node.getName());
+			}
+			if (isCastStr) {
+				buffer.append(")");
+			}
+			if (isApplyFunction) {
+				buffer.append(")");
+			}
+			if (isInRegexFilter.getParentNode().getSignature().contains("Regex") && !secondFilterParam) {
+				buffer.append(",");
+				secondFilterParam = true;
+			}
 		} else {
-			// unbound variable
-			if (node.isAnonymous())
-				buffer.append("[]");
-			else
-				buffer.append("?").append(node.getName());
+			if (node.hasValue()) {
+				// bound variable (constant)
+				Value value = node.getValue();
+				if (value instanceof IRI)
+					buffer.append("<").append(value).append(">");
+				else
+					buffer.append(value);
+			} else {
+				// unbound variable
+				if (node.isAnonymous())
+					buffer.append("[]");
+				else
+					buffer.append("?").append(node.getName());
+			}
 		}
 	}
 	
 	@Override
 	public void meet(ValueConstant node) throws RuntimeException {
-		buffer.append(node.getValue());
+		if (regexFilter) {
+			//System.out.println(node.getParentNode().getSignature());
+			QueryModelNode isInRegexFilter = node;
+			while(!(isInRegexFilter.getParentNode() instanceof MappedStatementPattern) && !(isInRegexFilter.getParentNode() instanceof Regex)) {
+				//System.out.println(isInRegexFilter.getSignature());
+				isInRegexFilter = isInRegexFilter.getParentNode();
+			}
+			Value value = node.getValue();
+			if (value instanceof IRI)
+				buffer.append("<").append(value).append(">");
+			else
+				buffer.append(value);
+			if (isInRegexFilter.getParentNode().getSignature().contains("Regex") && !secondFilterParam) {
+				buffer.append(",");
+				secondFilterParam = true;
+			}
+		} else {
+			Value value = node.getValue();
+			if (value instanceof IRI)
+				buffer.append("<").append(value).append(">");
+			else
+				buffer.append(value);
+		}
 	}
 
 	@Override

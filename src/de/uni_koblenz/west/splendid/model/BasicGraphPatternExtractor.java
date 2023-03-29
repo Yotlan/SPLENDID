@@ -30,7 +30,7 @@ import org.eclipse.rdf4j.query.algebra.QueryModelNode;
 import org.eclipse.rdf4j.query.algebra.StatementPattern;
 import org.eclipse.rdf4j.query.algebra.TupleExpr;
 import org.eclipse.rdf4j.query.algebra.UnaryTupleOperator;
-import org.eclipse.rdf4j.query.algebra.helpers.QueryModelVisitorBase;
+import org.eclipse.rdf4j.query.algebra.helpers.AbstractQueryModelVisitor;
 
 /**
  * Extracts all Basic Graph Patterns from a query model.
@@ -39,7 +39,7 @@ import org.eclipse.rdf4j.query.algebra.helpers.QueryModelVisitorBase;
  * 
  * @author Olaf Goerlitz
  */
-public class BasicGraphPatternExtractor extends QueryModelVisitorBase<RuntimeException> {
+public class BasicGraphPatternExtractor extends AbstractQueryModelVisitor<RuntimeException> {
 	
 	private TupleExpr lastBGPNode;
 	

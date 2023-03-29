@@ -382,7 +382,7 @@ public abstract class VoidCardinalityEstimator extends AbstractCardinalityEstima
 		
 		for (Graph source : pattern.getSources()) {
 			
-			Long pCount = stats.getDistinctPredicates(source);
+			//Long pCount = stats.getDistinctPredicates(source);
 			
 			if (varName.equals(pattern.getSubjectVar().getName())) {
 				count += stats.getDistinctSubjects(source);

@@ -22,8 +22,8 @@ package de.uni_koblenz.west.splendid.estimation;
 
 import org.eclipse.rdf4j.query.algebra.Join;
 import org.eclipse.rdf4j.query.algebra.UnaryTupleOperator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 
 import de.uni_koblenz.west.splendid.model.BindJoin;
 import de.uni_koblenz.west.splendid.model.HashJoin;
@@ -36,7 +36,7 @@ import de.uni_koblenz.west.splendid.model.RemoteQuery;
  */
 public class SPLENDIDCostEstimator extends AbstractCostEstimator {
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(SPLENDIDCostEstimator.class);
+	//private static final Logger LOGGER = LoggerFactory.getLogger(SPLENDIDCostEstimator.class);
 	
 	private static final int C_TRANSFER_QUERY = 5;
 	private static final int C_TRANSFER_TUPLE = 1;

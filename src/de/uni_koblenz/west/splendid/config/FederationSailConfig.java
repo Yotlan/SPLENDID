@@ -32,7 +32,7 @@ import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.repository.config.RepositoryConfigException;
 import org.eclipse.rdf4j.repository.config.RepositoryImplConfig;
-import org.eclipse.rdf4j.repository.config.RepositoryImplConfigBase;
+import org.eclipse.rdf4j.repository.config.AbstractRepositoryImplConfig;
 import org.eclipse.rdf4j.sail.config.SailConfigException;
 
 /**
@@ -108,7 +108,7 @@ public class FederationSailConfig extends AbstractSailConfig {
 		for (Value member : filter(model, implNode, MEMBER)) {
 			if (member instanceof Resource) {
 				try {
-					this.memberConfig.add(RepositoryImplConfigBase.create(model, (Resource) member));
+					this.memberConfig.add(AbstractRepositoryImplConfig.create(model, (Resource) member));
 				} catch (RepositoryConfigException e) {
 					throw new SailConfigException(e);
 				}

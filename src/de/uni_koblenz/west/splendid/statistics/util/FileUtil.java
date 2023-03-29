@@ -72,6 +72,11 @@ public class FileUtil {
 						}
 			    	}
 			    }
+				try {
+					zf.close();
+				} catch (Exception e) {
+					LOGGER.error("Can't close ZipFile: "+zf.getName());
+				}
 			} else {
 				input = new FileInputStream(filename);
 			}

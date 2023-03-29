@@ -22,7 +22,7 @@ package de.uni_koblenz.west.splendid.config;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 import de.uni_koblenz.west.splendid.VoidRepository;
 
@@ -34,7 +34,7 @@ import de.uni_koblenz.west.splendid.VoidRepository;
  */
 public class VoidRepositorySchema {
 	
-	private static final ValueFactory vf = ValueFactoryImpl.getInstance();
+	private static final ValueFactory vf = SimpleValueFactory.getInstance();
 
 	/**
 	 * The VoidRepository schema namespace (

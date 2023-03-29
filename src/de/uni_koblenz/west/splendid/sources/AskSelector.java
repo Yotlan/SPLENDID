@@ -30,6 +30,7 @@ import org.eclipse.rdf4j.sail.SailException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.uni_koblenz.west.splendid.SPLENDID;
 import de.uni_koblenz.west.splendid.helpers.OperatorTreePrinter;
 import de.uni_koblenz.west.splendid.helpers.QueryExecutor;
 import de.uni_koblenz.west.splendid.index.Graph;
@@ -72,6 +73,8 @@ public class AskSelector extends SourceSelectorBase {
 		
 		// ask each source for current pattern
 		for (Graph source : sources) {
+			//System.out.println("ASKSelector Config: "+config);
+			SPLENDID.queryInfo.nbAskQuery.getAndIncrement();
 			if (QueryExecutor.ask(source.toString(), sparqlPattern, config))
 				selectedSources.add(source);
 		}

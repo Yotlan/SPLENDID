@@ -133,7 +133,7 @@ public class QueryOptimizerConfig extends AbstractSailConfig {
 		Literal className = getObjectLiteral(model, implNode, EVAL_STRATEGY);
 		if (className != null) {
 			try {
-				this.evalStrategy = (EvaluationStrategy) Class.forName(className.stringValue()).newInstance();
+				this.evalStrategy = (EvaluationStrategy) Class.forName(className.stringValue()).getDeclaredConstructor().newInstance();
 			} catch (ClassNotFoundException e) {
 				throw new SailConfigException("unknown evaluation strategy impl: " + className);
 			} catch (InstantiationException e) {
@@ -142,6 +142,8 @@ public class QueryOptimizerConfig extends AbstractSailConfig {
 				throw new SailConfigException("failed to create evaluation strategy impl: " + className, e);
 			} catch (ClassCastException e) {
 				throw new SailConfigException(className + " is not an EvaluationStrategy", e);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
 			}
 		}
 	}

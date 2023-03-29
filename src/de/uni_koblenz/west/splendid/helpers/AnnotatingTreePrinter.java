@@ -45,7 +45,7 @@ import de.uni_koblenz.west.splendid.model.RemoteQuery;
  * 
  * @author Olaf Goerlitz
  */
-@SuppressWarnings({"deprecation","removal"})
+@SuppressWarnings({"deprecation"})
 public class AnnotatingTreePrinter extends QueryModelVisitorBase<RuntimeException> {
 	
 	private static final String LINE_SEPARATOR = System.getProperty("line.separator");

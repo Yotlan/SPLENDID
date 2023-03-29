@@ -24,6 +24,7 @@ import org.eclipse.rdf4j.common.iteration.CloseableIteration;
 import org.eclipse.rdf4j.common.iteration.DistinctIteration;
 import org.eclipse.rdf4j.common.iteration.EmptyIteration;
 import org.eclipse.rdf4j.common.iteration.UnionIteration;
+import org.eclipse.rdf4j.federated.structures.QueryInfo;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -43,7 +44,7 @@ import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
 import org.eclipse.rdf4j.query.algebra.Join;
-import org.eclipse.rdf4j.query.algebra.LeftJoin;
+//import org.eclipse.rdf4j.query.algebra.LeftJoin;
 import org.eclipse.rdf4j.query.algebra.QueryModelNode;
 import org.eclipse.rdf4j.query.algebra.StatementPattern;
 import org.eclipse.rdf4j.query.algebra.TupleExpr;
@@ -51,9 +52,9 @@ import org.eclipse.rdf4j.query.algebra.UnaryTupleOperator;
 import org.eclipse.rdf4j.query.algebra.evaluation.TripleSource;
 //import org.eclipse.rdf4j.query.algebra.evaluation.cursors.DistinctCursor;
 //import org.eclipse.rdf4j.query.algebra.evaluation.cursors.UnionCursor;
-import org.eclipse.rdf4j.query.algebra.evaluation.impl.EvaluationStrategyImpl;
+import org.eclipse.rdf4j.query.algebra.evaluation.impl.StrictEvaluationStrategy;
 import org.eclipse.rdf4j.query.algebra.evaluation.iterator.JoinIterator;
-import org.eclipse.rdf4j.query.algebra.helpers.QueryModelVisitorBase;
+import org.eclipse.rdf4j.query.algebra.helpers.AbstractQueryModelVisitor;
 //import org.eclipse.rdf4j.store.StoreException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,7 +80,7 @@ import de.uni_koblenz.west.splendid.model.RemoteQuery;
  * 
  * @author Olaf Goerlitz
  */
-public class FederationEvalStrategy extends EvaluationStrategyImpl {
+public class FederationEvalStrategy extends StrictEvaluationStrategy {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(FederationEvalStrategy.class);
 	
@@ -198,6 +199,8 @@ public class FederationEvalStrategy extends EvaluationStrategyImpl {
 			// TODO: can constants vars be removed here?
 			if (LOGGER.isTraceEnabled())
 				LOGGER.trace("argument bindings: " + joinVars + "; join bindings: " + resultVars);
+
+			//argCursor.close();
 		}
 
 		return joinCursor;
@@ -223,8 +226,11 @@ public class FederationEvalStrategy extends EvaluationStrategyImpl {
 		if (join instanceof HashJoin) {
 			return evaluate((HashJoin) join, bindings);
 		}
-		
-		throw new IllegalArgumentException("join type not supported: " + join);
+
+		//Same as BindJoin
+		return new JoinIterator(this, join, bindings);
+
+		//throw new IllegalArgumentException("join type not supported: " + join);
 	}
 
 	/**
@@ -243,6 +249,7 @@ public class FederationEvalStrategy extends EvaluationStrategyImpl {
 //	public Cursor<BindingSet> evaluate(StatementPattern sp, BindingSet bindings) throws StoreException {
 	public CloseableIteration<BindingSet, QueryEvaluationException> evaluate(StatementPattern sp, BindingSet bindings) throws QueryEvaluationException {
 
+		//System.out.println(sp);
 		if (sp instanceof MappedStatementPattern) {
 //			Set<Graph> sources = graphMap.get(sp);
 			Set<Graph> sources = ((MappedStatementPattern) sp).getSources();
@@ -251,6 +258,7 @@ public class FederationEvalStrategy extends EvaluationStrategyImpl {
 				LOGGER.debug("EVAL PATTERN {" + OperatorTreePrinter.print(sp) + "} on sources " + sources);
 			return sendSparqlQuery(sp, sources , bindings);
 		}
+
 		throw new IllegalArgumentException("pattern has no sources");
 
 	}
@@ -291,10 +299,22 @@ public class FederationEvalStrategy extends EvaluationStrategyImpl {
 		
 		CloseableIteration<BindingSet, QueryEvaluationException> cursor;
 		List<CloseableIteration<BindingSet, QueryEvaluationException>> cursors = new ArrayList<CloseableIteration<BindingSet, QueryEvaluationException>>(sources.size());
-		final String query = "SELECT REDUCED * WHERE {" + SparqlPrinter.print(expr) + "}";
 		
-		if (LOGGER.isDebugEnabled())
-			LOGGER.debug("Sending SPARQL query to '" + sources + " with bindings " + bindings + "\n" + query);
+		//Add graph clause to each source to query only given source !
+		String query = "SELECT REDUCED * WHERE {{";
+		int count = 1;
+		for (Graph source : sources) {
+			if (count!=sources.size()) {
+				query += "GRAPH <" + source.toString() + "> {" + SparqlPrinter.print(expr) + "}}UNION{";
+			} else {
+				query += "GRAPH <" + source.toString() + "> {" + SparqlPrinter.print(expr) + "}}";
+			}
+			count++;
+		}
+		query += "}";
+		
+		//if (LOGGER.isDebugEnabled())
+			//LOGGER.info("Sending SPARQL query to '" + sources + " with bindings " + bindings + "\n" + query);
 		
 		for (final Graph rep : sources) {
 			if (MULTI_THREADED)
@@ -356,7 +376,7 @@ public class FederationEvalStrategy extends EvaluationStrategyImpl {
 		return new AsyncCursor<BindingSet>(future);
 	}
 	
-	class SourceCollector extends QueryModelVisitorBase<RuntimeException> {
+	class SourceCollector extends AbstractQueryModelVisitor<RuntimeException> {
 		
 		Set<Graph> sources = new HashSet<Graph>();
 		
@@ -364,6 +384,7 @@ public class FederationEvalStrategy extends EvaluationStrategyImpl {
 			synchronized (this) {
 				sources.clear();
 				node.visit(this);
+				//System.out.println("SOURCES: "+sources);
 				return sources;
 			}
 		}
@@ -379,7 +400,7 @@ public class FederationEvalStrategy extends EvaluationStrategyImpl {
 		
 	}
 	
-	static class PatternCollector extends QueryModelVisitorBase<RuntimeException> {
+	static class PatternCollector extends AbstractQueryModelVisitor<RuntimeException> {
 		
 		Set<StatementPattern> patternSet = new HashSet<StatementPattern>();
 		

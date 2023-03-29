@@ -34,7 +34,7 @@ import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.repository.config.RepositoryConfigException;
-import org.eclipse.rdf4j.repository.config.RepositoryImplConfigBase;
+import org.eclipse.rdf4j.repository.config.AbstractRepositoryImplConfig;
 import org.eclipse.rdf4j.sail.config.SailConfigException;
 
 /**
@@ -42,7 +42,7 @@ import org.eclipse.rdf4j.sail.config.SailConfigException;
  * 
  * @author Olaf Goerlitz
  */
-public class VoidRepositoryConfig extends RepositoryImplConfigBase {
+public class VoidRepositoryConfig extends AbstractRepositoryImplConfig {
 	
 	private IRI voidIRI;
 	private IRI endpoint;
@@ -97,7 +97,9 @@ public class VoidRepositoryConfig extends RepositoryImplConfigBase {
 	public void parse(Model model, Resource implNode) throws RepositoryConfigException { // Sesame 2
 		super.parse(model, implNode);
 		
+		//System.out.println("voidIRI before :"+this.voidIRI);
 		this.voidIRI = getObjectIRI(model, implNode, VOID_IRI);
+		//System.out.println("voidIRI after :"+this.voidIRI);
 		if (this.voidIRI == null)
 //			throw new StoreConfigException("VoidRepository requires: " + VOID_IRI);  // Sesame 3
 			throw new RepositoryConfigException("VoidRepository requires: " + VOID_IRI);
@@ -140,6 +142,7 @@ public class VoidRepositoryConfig extends RepositoryImplConfigBase {
 		if (objects.hasNext())
 			throw new RepositoryConfigException("found multiple settings for property " + property);
 		Value object = st.getObject();
+		//System.out.println("object :"+ (IRI) object);
 		if (object instanceof IRI)
 			return (IRI) object;
 		else

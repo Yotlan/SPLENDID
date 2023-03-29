@@ -39,6 +39,7 @@ import org.eclipse.rdf4j.query.algebra.helpers.VarNameCollector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.uni_koblenz.west.splendid.SPLENDID;
 import de.uni_koblenz.west.splendid.helpers.FilterConditionCollector;
 import de.uni_koblenz.west.splendid.helpers.Format;
 import de.uni_koblenz.west.splendid.model.BindJoin;
@@ -65,54 +66,58 @@ public class DynamicProgrammingOptimizer extends AbstractFederationOptimizer {
 	public TupleExpr optimizeBGP(TupleExpr bgp) {
 		
 		long time = System.currentTimeMillis();
-
-		PlanCollection optPlans = new PlanCollection();
-		List<ValueExpr> conditions = FilterConditionCollector.process(bgp);
-
-		// create access plans for all statement patterns
-		List<TupleExpr> plans = this.getBaseExpressions(bgp);
-		int count = plans.size();
-		prune(plans);
-		optPlans.add(new HashSet<TupleExpr>(plans), 1);
 		
-		// create all n-ary join combinations [n = 2 .. #plans]
-		for (int n = 2; n <= count; n++) {
-			
-			// build n-ary joins by combining i-ary joins and (n-i)-ary joins
-			for (int i = 1; i < n; i++) {
-				
-				Set<TupleExpr> plans1 = optPlans.get(i);
-				Set<TupleExpr> plans2 = optPlans.get(n-i);
-				
-				// find for each plan all complementary plans to join
-				for (TupleExpr plan : plans1) {
-					Set<TupleExpr> comp = filterDistinctPlans(plan, plans2);
-					// we may not always find complementary plans
-					if (comp.size() > 0) {
-						// cross products are created if there is no common join variable
-						plans = createJoins(plan, comp, conditions);
-						optPlans.add(new HashSet<TupleExpr>(plans), n);
+		try {
+			PlanCollection optPlans = new PlanCollection();
+			List<ValueExpr> conditions = FilterConditionCollector.process(bgp);
+
+			// create access plans for all statement patterns
+			List<TupleExpr> plans = this.getBaseExpressions(bgp);
+			int count = plans.size();
+			prune(plans);
+			optPlans.add(new HashSet<TupleExpr>(plans), 1);
+			// create all n-ary join combinations [n = 2 .. #plans]
+			for (int n = 2; n <= count; n++) {
+				// build n-ary joins by combining i-ary joins and (n-i)-ary joins
+				for (int i = 1; i < n; i++) {
+					
+					Set<TupleExpr> plans1 = optPlans.get(i);
+					Set<TupleExpr> plans2 = optPlans.get(n-i);
+					
+					// find for each plan all complementary plans to join
+					for (TupleExpr plan : plans1) {
+						Set<TupleExpr> comp = filterDistinctPlans(plan, plans2);
+						// we may not always find complementary plans
+						if (comp.size() > 0) {
+							// cross products are created if there is no common join variable
+							plans = createJoins(plan, comp, conditions);
+							//LOGGER.info(plans.toString());
+							optPlans.add(new HashSet<TupleExpr>(plans), n);
+						}
 					}
 				}
+				
+				//if (LOGGER.isTraceEnabled())
+					//LOGGER.info(optPlans.get(n).size() + " plans generated for N=" + n);
+
+				prune(optPlans.get(n)); //Problem with this line, need to avoid prune of null !
+
 			}
 			
-			if (LOGGER.isTraceEnabled())
-				LOGGER.trace(optPlans.get(n).size() + " plans generated for N=" + n);
+			//if (LOGGER.isDebugEnabled())
+				//LOGGER.info("time taken for optimization: " + (System.currentTimeMillis() - time));
+			SPLENDID.queryInfo.planningTime = System.currentTimeMillis() - time;
+			// return the final plan
+			if (optPlans.get(count).size() == 0)
+				// This is wrong: how do we get here?
+				throw new UnsupportedOperationException("Queries requiring cross products are not supported (yet)");
 			
-			prune(optPlans.get(n));
+			TupleExpr newOp = optPlans.get(count).iterator().next();
+			bgp.replaceWith(newOp);
+			return newOp;
+		} catch (Exception e) {
+			return bgp;
 		}
-		
-		if (LOGGER.isDebugEnabled())
-			LOGGER.debug("time taken for optimization: " + (System.currentTimeMillis() - time));
-		
-		// return the final plan
-		if (optPlans.get(count).size() == 0)
-			// This is wrong: how do we get here?
-			throw new UnsupportedOperationException("Queries requiring cross products are not supported (yet)");
-		
-		TupleExpr newOp = optPlans.get(count).iterator().next();
-		bgp.replaceWith(newOp);
-		return newOp;
 
 	}
 	
@@ -286,16 +291,16 @@ public class DynamicProgrammingOptimizer extends AbstractFederationOptimizer {
 				
 				if (bestPlan == null || cost < lowestCost) {
 					
-					if (LOGGER.isTraceEnabled() && bestPlan != null) {
-						LOGGER.trace("found better plan (" + Format.d(cost, 2) + " < " + Format.d(lowestCost, 2) + "): " + planCount + " of " + equalSet.size() + " in class " + eqClass);
-					}
+					//if (/*LOGGER.isTraceEnabled() && */bestPlan != null) {
+					//	LOGGER.info("found better plan (" + Format.d(cost, 2) + " < " + Format.d(lowestCost, 2) + "): " + planCount + " of " + equalSet.size() + " in class " + eqClass);
+					//}
 					
 					bestPlan = plan;
 					lowestCost = cost;
 				} else {
-					if (LOGGER.isTraceEnabled()) {
-						LOGGER.trace("discarding plan (" + Format.d(cost, 2) + " > " + Format.d(lowestCost, 2) + "): " + planCount + " of " + equalSet.size() + " in class " + eqClass);
-					}
+					//if (LOGGER.isTraceEnabled()) {
+						//LOGGER.info("discarding plan (" + Format.d(cost, 2) + " > " + Format.d(lowestCost, 2) + "): " + planCount + " of " + equalSet.size() + " in class " + eqClass);
+					//}
 				}
 			}
 			

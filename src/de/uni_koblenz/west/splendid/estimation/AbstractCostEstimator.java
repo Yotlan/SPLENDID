@@ -21,12 +21,12 @@
 package de.uni_koblenz.west.splendid.estimation;
 
 import org.eclipse.rdf4j.query.algebra.TupleExpr;
-import org.eclipse.rdf4j.query.algebra.helpers.QueryModelVisitorBase;
+import org.eclipse.rdf4j.query.algebra.helpers.AbstractQueryModelVisitor;
 
 /**
  * @author Olaf Goerlitz
  */
-public abstract class AbstractCostEstimator extends QueryModelVisitorBase<RuntimeException> implements ModelEvaluator {
+public abstract class AbstractCostEstimator extends AbstractQueryModelVisitor<RuntimeException> implements ModelEvaluator {
 	
 	protected double cost;
 	

@@ -137,13 +137,13 @@ public class NQuadSourceAggregator {
 				try {
 					InputStream in = getInputStream(input);
 					process(in, writer);
-					in.close();
+					//in.close();
 				} catch (IOException e) {
 					System.err.println("cannot process " + e.getMessage());
 				}
 			}
 			
-			writer.close();
+			//writer.close();
 			
 		} catch (IOException e) {
 			e.printStackTrace();

@@ -60,7 +60,7 @@ import de.uni_koblenz.west.splendid.helpers.ReadOnlySailConnection;
  * 
  * @author Olaf Goerlitz
  */
-@SuppressWarnings({"deprecation","removal"})
+//@SuppressWarnings({"deprecation","removal"})
 public class FederationSailConnection extends ReadOnlySailConnection {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(FederationSailConnection.class);
