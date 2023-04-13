@@ -20,12 +20,15 @@
 package de.uni_koblenz.west.splendid;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintStream;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -44,6 +47,7 @@ import org.eclipse.rdf4j.query.QueryInterruptedException;
 import org.eclipse.rdf4j.query.QueryLanguage;
 //import org.eclipse.rdf4j.query.QueryResult;
 import org.eclipse.rdf4j.query.TupleQuery;
+import org.eclipse.rdf4j.query.TupleQueryResult;
 import org.eclipse.rdf4j.query.TupleQueryResultHandler;
 //import org.eclipse.rdf4j.query.TupleQueryResult;
 import org.eclipse.rdf4j.query.TupleQueryResultHandlerException;
@@ -204,6 +208,13 @@ public class SPLENDID {
 			LOGGER.warn("No query files specified");
 		}
 		
+		String homeDir = Paths.get(resultfile).getParent().toString();
+		String sourceSelectionTimeFile = homeDir + "/source_selection_time.txt";
+		String planningTimeFile = homeDir + "/planning_time_file.txt";
+		String askFile = homeDir + "/ask.txt";
+		String execTimeFile = homeDir + "/exec_time.txt";
+		OutputStream out = System.out;
+		
 		for (String queryString : loadSparqlQueries(queryFiles)) {
 			//LOGGER.info("Executing QUERY:\n" + queryString);
 			//LOGGER.info("RESULT:");
@@ -214,7 +225,18 @@ public class SPLENDID {
 					//System.out.println("TUPLE QUERY...");
 					TupleQuery tupleQuery = (TupleQuery) query;
 					tupleQuery.setMaxExecutionTime(timeout);
-					//TupleQueryResult res = tupleQuery.evaluate();
+					//Just to get nbAsk and planningtime
+					
+					// System.setOut(new PrintStream(new File(askfile)));
+					// System.out.println(queryInfo.nbAskQuery.get());
+					// System.setOut(new PrintStream(new File(planningtimeFile)));
+					// System.out.println(queryInfo.planningTime);
+					//Reset nbAsk and planningtime to avoid issue
+					queryInfo.nbAskQuery.set(0);
+					queryInfo.planningTime = 0;
+
+					TupleQueryResult res = tupleQuery.evaluate();
+
 					//int count=0;
 					//System.out.println("DISPLAY TUPLE QUERY RESULT...");
 					//while (res.hasNext()) {
@@ -222,15 +244,38 @@ public class SPLENDID {
 					//	System.out.println(count+": "+ row);
 					//	count++;
 					//}
+
+					// Write source_selection_time.txt
+                    //try (BufferedWriter sourceSelectionTimeWriter = new BufferedWriter(new FileWriter(sourceSelectionTimeFile))) {
+                    //    sourceSelectionTimeWriter.write(String.valueOf(queryInfo));
+                    //}
+
+                    // Write query_planning_time.txt
+                    try (BufferedWriter planningTimeWriter = new BufferedWriter(new FileWriter(planningTimeFile))) {
+                        planningTimeWriter.write(String.valueOf(queryInfo.planningTime));
+                    }
+
+                    // Write ask.txt
+                    try (BufferedWriter askWriter = new BufferedWriter(new FileWriter(askFile))) {
+                        askWriter.write(String.valueOf(queryInfo.nbAskQuery.get()));
+                    }
+
 					System.setOut(new PrintStream(new File(explanationfile)));
 					System.out.println(tupleQuery);
 					System.setOut(new PrintStream(new File(resultfile)));
+					try (BufferedWriter resultWriter = new BufferedWriter(new FileWriter(resultfile))) {
 					long startTime = System.currentTimeMillis();
 					tupleQuery.evaluate(new SPARQLResultsCSVWriter(System.out));
+						System.setOut(new PrintStream(out));
 					long runTime = System.currentTimeMillis() - startTime;
-					System.setOut(new PrintStream(statfile));
-					System.out.println("query,engine,instance,batch,attempt,exec_time,ask,source_selection_time,planning_time");
-					System.out.println("injected.sparql,splendid,instance_id,batch_id,attempt_id,"+runTime+","+queryInfo.nbAskQuery.get()+","+provenancetime+","+queryInfo.planningTime);
+
+						try (BufferedWriter execTimeWriter = new BufferedWriter(new FileWriter(execTimeFile))) {
+							execTimeWriter.write(String.valueOf(runTime));
+						}
+					}
+					//System.setOut(new PrintStream(statfile));
+					//System.out.println("query,engine,instance,batch,attempt,exec_time,ask,source_selection_time,planning_time");
+					//System.out.println("injected.sparql,splendid,instance_id,batch_id,attempt_id,"+runTime+","+queryInfo.nbAskQuery.get()+","+provenancetime+","+queryInfo.planningTime);
 					//System.out.println("DONE !");
 				}
 				if (query instanceof GraphQuery) {
@@ -247,13 +292,13 @@ public class SPLENDID {
 				e.printStackTrace();
 			} catch (QueryInterruptedException e) {
 				//LOGGER.info(queryFiles.get(0)+" timeout !");
-				try {
+				/*try {
 					System.setOut(new PrintStream(statfile));
 					System.out.println("query,engine,instance,batch,attempt,exec_time,ask,source_selection_time,planning_time");
 					System.out.println("injected.sparql,splendid,instance_id,batch_id,attempt_id,timeout,"+queryInfo.nbAskQuery.get()+","+provenancetime+","+queryInfo.planningTime);
 				} catch (Exception error) {
 					LOGGER.error(error.getMessage());
-				}
+				}*/
 			} catch (QueryEvaluationException e) {
 				e.printStackTrace();
 			} catch (TupleQueryResultHandlerException e) {
@@ -263,13 +308,13 @@ public class SPLENDID {
 			} catch (Exception e) {
 				//LOGGER.info(queryFiles.get(0)+" failed with the following error: "+e.getMessage());
 				//e.printStackTrace();
-				try {
+				/*try {
 					System.setOut(new PrintStream(statfile));
 					System.out.println("query,engine,instance,batch,attempt,exec_time,ask,source_selection_time,planning_time,ask_query");
 					System.out.println("injected.sparql,splendid,instance_id,batch_id,attempt_id,"+e.getMessage()+","+queryInfo.nbAskQuery.get()+","+provenancetime+","+queryInfo.planningTime);
 				} catch (Exception error) {
 					LOGGER.error(error.getMessage());
-				}
+				}*/
 			}
 			System.out.println("\n");
 		}
