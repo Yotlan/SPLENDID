@@ -29,19 +29,25 @@ statFile=$7
 query=$8
 
 # include all jar files in classpath
-for jar in lib/*.jar; do classpath=$classpath:$jar; done
+# for jar in lib/*.jar; do classpath=$classpath:$jar; done
 
 if [ $9 = true ]; then
-    # build SourceSelectionEval
-    javac -d ./bin -cp $classpath $mainclassfile1 $firstserviceclassfile $secondserviceclassfile
-    # build SPLENDID
-    javac -d ./bin -cp $classpath $mainclassfile2 $firstserviceclassfile $secondserviceclassfile
+    # # build SourceSelectionEval
+    # javac -d ./bin -cp $classpath $mainclassfile1 $firstserviceclassfile $secondserviceclassfile
+    # # build SPLENDID
+    # javac -d ./bin -cp $classpath $mainclassfile2 $firstserviceclassfile $secondserviceclassfile
+    mvn clean && mvn install dependency:copy-dependencies package
 fi
 
 if [ $10 = true ]; then
     # run SourceSelectionEval
-    java -cp $classpath:./bin $mainclass1 $2 $5
-    sourceSelectionTime=$(echo `java -cp $classpath:./bin $mainclass1 $2 $5`)
+    #echo "java -cp $classpath:./bin de.uni_koblenz.west.evaluation.SourceSelectionEval $properties $provenanceFile"
+    #sourceSelectionTime=$(echo `java -cp $classpath:./bin de.uni_koblenz.west.evaluation.SourceSelectionEval $properties $provenanceFile`)
+    mvn -q exec:java -Dexec.mainClass="de.uni_koblenz.west.evaluation.SourceSelectionEval" -Dexec.args="$properties $provenanceFile"
+    sourceSelectionTime=$(echo `mvn -q exec:java -Dexec.mainClass="de.uni_koblenz.west.evaluation.SourceSelectionEval" -Dexec.args="$properties $provenanceFile"`)
+    
     # run SPLENDID
-    java -cp $classpath:./bin $mainclass2 $1 $sourceSelectionTime $3 $4 $6 $7 $8
+    #java -cp $classpath:./bin $mainclass2 $1 $sourceSelectionTime $3 $4 $6 $7 $8
+    echo "$config $sourceSelectionTime $timeout $resultFile $explainFile $statFile $query"
+    mvn -q exec:java -Dexec.mainClass="de.uni_koblenz.west.splendid.SPLENDID" -Dexec.args="$config $sourceSelectionTime $timeout $resultFile $explainFile $statFile $query"
 fi
