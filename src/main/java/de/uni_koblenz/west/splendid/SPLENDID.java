@@ -23,6 +23,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -34,6 +35,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.rdf4j.federated.monitoring.QueryPlanLog;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.impl.DynamicModel;
 import org.eclipse.rdf4j.model.impl.DynamicModelFactory;
@@ -77,50 +79,52 @@ import de.uni_koblenz.west.splendid.sources.SourceSelectorBase;
 import de.uni_koblenz.west.splendid.test.config.ConfigurationException;
 
 /**
- * Command Line Interface for the SPLENDID federation.  
+ * Command Line Interface for the SPLENDID federation.
  * 
  * @author goerlitz@uni-koblenz.de
  */
 public class SPLENDID {
-	
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(SPLENDID.class);
-	
+
 	private Repository repo;
 
 	public static QueryInfo queryInfo = new QueryInfo();
-	
+
 	public static void main(String[] args) {
-		
+
 		if (args.length < 7) {
-			System.out.println("USAGE: java SPLENDID <config> <provenance> <timeout> <result> <explain> <stat> <query>\nONLY have theses args: ");
-			for(int i=0; i<args.length; i++) {
-				System.out.println("- "+args[i]);
+			System.out.println(
+					"USAGE: java SPLENDID <config> <provenance> <timeout> <result> <explain> <stat> <query>\nONLY have theses args: ");
+			for (int i = 0; i < args.length; i++) {
+				System.out.println("- " + args[i]);
 			}
 			System.exit(1);
 		}
-		
+
 		String configFile = args[0];
 		String provenancetime = args[1];
-		//System.out.println(provenancetime);
+		// System.out.println(provenancetime);
 		String timeout = args[2];
 		String resultfile = args[3];
-		//System.out.println(resultfile);
+		// System.out.println(resultfile);
 		String explanationfile = args[4];
-		//System.out.println(explanationfile);
+		// System.out.println(explanationfile);
 		String statfile = args[5];
-		//System.out.println(statfile);
+		// System.out.println(statfile);
 		List<String> queryFiles = Arrays.asList(Arrays.copyOfRange(args, 6, args.length));
-		//System.out.println(queryFiles);
-		
+		// System.out.println(queryFiles);
+
 		try {
 			LOGGER.info("Init SPLENDID...");
 			SPLENDID splendid = new SPLENDID(configFile);
 			LOGGER.info("Exec SPARQL queries...");
-			splendid.execSparqlQueries(queryFiles, Integer.valueOf(timeout), resultfile, provenancetime, explanationfile, statfile);
+			splendid.execSparqlQueries(queryFiles, Integer.valueOf(timeout), resultfile, provenancetime,
+					explanationfile, statfile);
 		} catch (ConfigurationException e) {
 			e.printStackTrace();
 		}
-	
+
 		// must exit explicitly due to hang-ups of the HTTP connection pool
 		System.exit(0);
 	}
@@ -139,22 +143,22 @@ public class SPLENDID {
 			throw new ConfigurationException("error initializing repository: " + e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Loads SPARQL queries from the supplied files.
-	 *  
+	 * 
 	 * @param fileNames The names of the query files.
 	 * @return The list of SPARQL queries.
 	 */
 	private List<String> loadSparqlQueries(List<String> fileNames) {
-		
+
 		List<File> fileList = new ArrayList<File>();
 		List<String> queries = new ArrayList<String>();
-		
+
 		for (String fileName : fileNames) {
-			
+
 			File file = new File(fileName);
-			
+
 			if (!file.canRead()) {
 				LOGGER.warn("cannot read file: " + file);
 				continue;
@@ -183,100 +187,98 @@ public class SPLENDID {
 				buffer = new StringBuffer();
 				BufferedReader r = new BufferedReader(new FileReader(query));
 				String input;
-				while((input = r.readLine()) != null) {
+				while ((input = r.readLine()) != null) {
 					buffer.append(input).append("\n");
 				}
 				queries.add(buffer.toString());
-				//r.close(); //Also throw an IOException
+				// r.close(); //Also throw an IOException
 			} catch (FileNotFoundException e) {
 				LOGGER.warn("cannot find query file: " + query);
 			} catch (IOException e) {
 				LOGGER.warn("cannot read query file: " + query);
 			}
 		}
-		
+
 		return queries;
 	}
-	
+
 	/**
 	 * Executes the queries from the supplied query files.
 	 * 
 	 * @param queryFiles A list of files containing the queries.
 	 */
-	private void execSparqlQueries(List<String> queryFiles, int timeout, String resultfile, String provenancetime, String explanationfile, String statfile) {
+	private void execSparqlQueries(List<String> queryFiles, int timeout, String resultfile, String provenancetime,
+			String explanationfile, String statfile) {
 		if (queryFiles == null || queryFiles.size() == 0) {
 			LOGGER.warn("No query files specified");
 		}
-		
+
 		String homeDir = Paths.get(resultfile).getParent().toString();
 		String sourceSelectionTimeFile = homeDir + "/source_selection_time.txt";
-		String planningTimeFile = homeDir + "/planning_time_file.txt";
+		String planningTimeFile = homeDir + "/planning_time.txt";
 		String askFile = homeDir + "/ask.txt";
 		String execTimeFile = homeDir + "/exec_time.txt";
 		OutputStream out = System.out;
-		
+
 		for (String queryString : loadSparqlQueries(queryFiles)) {
-			//LOGGER.info("Executing QUERY:\n" + queryString);
-			//LOGGER.info("RESULT:");
+			// LOGGER.info("Executing QUERY:\n" + queryString);
+			// LOGGER.info("RESULT:");
 			try {
 				RepositoryConnection con = repo.getConnection();
 				Query query = con.prepareQuery(QueryLanguage.SPARQL, queryString);
 				if (query instanceof TupleQuery) {
-					//System.out.println("TUPLE QUERY...");
+					// System.out.println("TUPLE QUERY...");
 					TupleQuery tupleQuery = (TupleQuery) query;
 					tupleQuery.setMaxExecutionTime(timeout);
-					//Just to get nbAsk and planningtime
-					
-					// System.setOut(new PrintStream(new File(askfile)));
-					// System.out.println(queryInfo.nbAskQuery.get());
-					// System.setOut(new PrintStream(new File(planningtimeFile)));
-					// System.out.println(queryInfo.planningTime);
-					//Reset nbAsk and planningtime to avoid issue
+					// Just to get nbAsk and planningtime
+
+					// Reset nbAsk and planningtime to avoid issue
 					queryInfo.nbAskQuery.set(0);
 					queryInfo.planningTime = 0;
 
 					TupleQueryResult res = tupleQuery.evaluate();
 
-					//int count=0;
-					//System.out.println("DISPLAY TUPLE QUERY RESULT...");
-					//while (res.hasNext()) {
-					//	BindingSet row = res.next();
-					//	System.out.println(count+": "+ row);
-					//	count++;
-					//}
+					// int count=0;
+					// System.out.println("DISPLAY TUPLE QUERY RESULT...");
+					// while (res.hasNext()) {
+					// BindingSet row = res.next();
+					// System.out.println(count+": "+ row);
+					// count++;
+					// }
 
 					// Write source_selection_time.txt
-                    //try (BufferedWriter sourceSelectionTimeWriter = new BufferedWriter(new FileWriter(sourceSelectionTimeFile))) {
-                    //    sourceSelectionTimeWriter.write(String.valueOf(queryInfo));
-                    //}
+					// try (BufferedWriter sourceSelectionTimeWriter = new BufferedWriter(new
+					// FileWriter(sourceSelectionTimeFile))) {
+					// sourceSelectionTimeWriter.write(String.valueOf(queryInfo));
+					// }
 
-                    // Write query_planning_time.txt
-                    try (BufferedWriter planningTimeWriter = new BufferedWriter(new FileWriter(planningTimeFile))) {
-                        planningTimeWriter.write(String.valueOf(queryInfo.planningTime));
-                    }
+					// Write query_planning_time.txt
+					try (BufferedWriter planningTimeWriter = new BufferedWriter(new FileWriter(planningTimeFile))) {
+						planningTimeWriter.write(String.valueOf(queryInfo.planningTime));
+					}
 
-                    // Write ask.txt
-                    try (BufferedWriter askWriter = new BufferedWriter(new FileWriter(askFile))) {
-                        askWriter.write(String.valueOf(queryInfo.nbAskQuery.get()));
-                    }
+					// Write ask.txt
+					try (BufferedWriter askWriter = new BufferedWriter(new FileWriter(askFile))) {
+						askWriter.write(String.valueOf(queryInfo.nbAskQuery.get()));
+					}
 
-					System.setOut(new PrintStream(new File(explanationfile)));
-					System.out.println(tupleQuery);
-					System.setOut(new PrintStream(new File(resultfile)));
-					try (BufferedWriter resultWriter = new BufferedWriter(new FileWriter(resultfile))) {
-					long startTime = System.currentTimeMillis();
-					tupleQuery.evaluate(new SPARQLResultsCSVWriter(System.out));
-						System.setOut(new PrintStream(out));
-					long runTime = System.currentTimeMillis() - startTime;
+					// Write query_plan.txt
+					try (BufferedWriter queryPlanWriter = new BufferedWriter(new FileWriter(explanationfile))) {
+						queryPlanWriter.write(QueryPlanLog.getQueryPlan());
+						//queryPlanWriter.write(tupleQuery.toString());
+					}
+
+					// Write results.txt
+					try (OutputStream resultOutputStream = new FileOutputStream(resultfile)) {
+						long startTime = System.currentTimeMillis();
+						tupleQuery.evaluate(new SPARQLResultsCSVWriter(resultOutputStream));
+						long runTime = System.currentTimeMillis() - startTime;
 
 						try (BufferedWriter execTimeWriter = new BufferedWriter(new FileWriter(execTimeFile))) {
 							execTimeWriter.write(String.valueOf(runTime));
 						}
 					}
-					//System.setOut(new PrintStream(statfile));
-					//System.out.println("query,engine,instance,batch,attempt,exec_time,ask,source_selection_time,planning_time");
-					//System.out.println("injected.sparql,splendid,instance_id,batch_id,attempt_id,"+runTime+","+queryInfo.nbAskQuery.get()+","+provenancetime+","+queryInfo.planningTime);
-					//System.out.println("DONE !");
+
 				}
 				if (query instanceof GraphQuery) {
 					GraphQuery graphQuery = (GraphQuery) query;
@@ -291,14 +293,7 @@ public class SPLENDID {
 			} catch (MalformedQueryException e) {
 				e.printStackTrace();
 			} catch (QueryInterruptedException e) {
-				//LOGGER.info(queryFiles.get(0)+" timeout !");
-				/*try {
-					System.setOut(new PrintStream(statfile));
-					System.out.println("query,engine,instance,batch,attempt,exec_time,ask,source_selection_time,planning_time");
-					System.out.println("injected.sparql,splendid,instance_id,batch_id,attempt_id,timeout,"+queryInfo.nbAskQuery.get()+","+provenancetime+","+queryInfo.planningTime);
-				} catch (Exception error) {
-					LOGGER.error(error.getMessage());
-				}*/
+				e.printStackTrace();
 			} catch (QueryEvaluationException e) {
 				e.printStackTrace();
 			} catch (TupleQueryResultHandlerException e) {
@@ -306,55 +301,52 @@ public class SPLENDID {
 			} catch (RDFHandlerException e) {
 				e.printStackTrace();
 			} catch (Exception e) {
-				//LOGGER.info(queryFiles.get(0)+" failed with the following error: "+e.getMessage());
-				//e.printStackTrace();
-				/*try {
-					System.setOut(new PrintStream(statfile));
-					System.out.println("query,engine,instance,batch,attempt,exec_time,ask,source_selection_time,planning_time,ask_query");
-					System.out.println("injected.sparql,splendid,instance_id,batch_id,attempt_id,"+e.getMessage()+","+queryInfo.nbAskQuery.get()+","+provenancetime+","+queryInfo.planningTime);
-				} catch (Exception error) {
-					LOGGER.error(error.getMessage());
-				}*/
+				e.printStackTrace();
 			}
 			System.out.println("\n");
 		}
 	}
-	
+
 	/**
-	 * Loads the repository configuration model from the specified configuration file.
+	 * Loads the repository configuration model from the specified configuration
+	 * file.
 	 * 
 	 * @param configFile The file which contains the configuration data.
 	 * @return The configuration data model.
-	 * @throws ConfigurationException If the configuration data is invalid or incomplete.
+	 * @throws ConfigurationException If the configuration data is invalid or
+	 *                                incomplete.
 	 */
 	private Model loadRepositoryConfig(String configFile) throws ConfigurationException {
 		File file = new File(configFile);
-		//System.out.println(file);
+		// System.out.println(file);
 		String baseURI = file.toURI().toString();
-		//System.out.println(baseURI);
+		// System.out.println(baseURI);
 		RDFFormat format = Rio.getParserFormatForFileName(configFile).get();
 		if (format == null)
 			throw new ConfigurationException("unknown RDF format of repository config: " + file);
-		
+
 		try {
 			Model model = new DynamicModel(new DynamicModelFactory());
 			RDFParser parser = Rio.createParser(format);
 			parser.setRDFHandler(new StatementCollector(model));
 			parser.parse(new FileReader(file), baseURI);
-			//System.out.println(parser);
+			// System.out.println(parser);
 			return model;
-			
+
 		} catch (UnsupportedRDFormatException e) {
-			throw new ConfigurationException("cannot load repository config, unsupported RDF format (" + format + "): " + file);
+			throw new ConfigurationException(
+					"cannot load repository config, unsupported RDF format (" + format + "): " + file);
 		} catch (RDFParseException e) {
-			throw new ConfigurationException("cannot load repository config, RDF parser error: " + e.getMessage() + ": " + file);
+			throw new ConfigurationException(
+					"cannot load repository config, RDF parser error: " + e.getMessage() + ": " + file);
 		} catch (RDFHandlerException e) {
-			throw new ConfigurationException("cannot load repository config, RDF handler error: " + e.getMessage() + ": " + file);
+			throw new ConfigurationException(
+					"cannot load repository config, RDF handler error: " + e.getMessage() + ": " + file);
 		} catch (IOException e) {
 			throw new ConfigurationException("cannot load repository config, IO error: " + e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * Returns a (un-initialized) Repository instance that has been configured
 	 * based on the supplied configuration data.
@@ -362,18 +354,18 @@ public class SPLENDID {
 	 * @param configuration The repository configuration data.
 	 * @return The created (but un-initialized) repository.
 	 * @throws ConfigurationException If no repository could be created due to
-	 *         invalid or incomplete configuration data.
+	 *                                invalid or incomplete configuration data.
 	 */
 	private Repository getRepositoryInstance(Model configuration) throws ConfigurationException {
-		
+
 		RepositoryConfig repoConfig = null;
 		try {
-			
+
 			// read configuration
 			repoConfig = RepositoryConfig.create(configuration, null);
 			repoConfig.validate();
 			RepositoryImplConfig repoImplConfig = repoConfig.getRepositoryImplConfig();
-			
+
 			// initialize repository factory
 			RepositoryRegistry registry = RepositoryRegistry.getInstance();
 			RepositoryFactory factory = registry.get(repoImplConfig.getType()).get();
@@ -383,10 +375,10 @@ public class SPLENDID {
 						+ " in repository definition (id:" + repoConfig.getID()
 						+ ", title:" + repoConfig.getTitle() + ")");
 			}
-			
+
 			// create repository
 			return factory.getRepository(repoImplConfig);
-			
+
 		} catch (RepositoryConfigException e) {
 			String reason = "error creating repository";
 			if (repoConfig != null)
