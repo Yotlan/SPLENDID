@@ -5,4 +5,5 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class QueryInfo {
     public AtomicInteger nbAskQuery = new AtomicInteger();   
     public long planningTime = 0;
+    public long sourceSelectionTime = 0;
 }

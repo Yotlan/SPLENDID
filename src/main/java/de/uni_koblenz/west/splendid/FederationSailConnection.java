@@ -38,6 +38,8 @@ import org.eclipse.rdf4j.query.algebra.evaluation.impl.BindingAssigner;
 import org.eclipse.rdf4j.query.algebra.evaluation.impl.CompareOptimizer;
 import org.eclipse.rdf4j.query.algebra.evaluation.impl.ConjunctiveConstraintSplitter;
 import org.eclipse.rdf4j.query.algebra.evaluation.impl.DisjunctiveConstraintOptimizer;
+import org.eclipse.rdf4j.query.algebra.evaluation.impl.FilterOptimizer;
+import org.eclipse.rdf4j.query.algebra.evaluation.impl.QueryModelPruner;
 import org.eclipse.rdf4j.query.algebra.evaluation.impl.SameTermFilterOptimizer;
 import org.eclipse.rdf4j.query.algebra.evaluation.util.QueryOptimizerList;
 import org.eclipse.rdf4j.query.impl.EmptyBindingSet;
@@ -120,8 +122,8 @@ public class FederationSailConnection extends ReadOnlySailConnection {
 		optimizerList.add(new ConjunctiveConstraintSplitter());
 		optimizerList.add(new DisjunctiveConstraintOptimizer());
 		optimizerList.add(new SameTermFilterOptimizer());
-//		optimizerList.add(new FilterOptimizer());
-//		optimizerList.add(new QueryModelPruner());
+		// optimizerList.add(new FilterOptimizer());
+		// optimizerList.add(new QueryModelPruner());
 		optimizerList.add(this.optimizer);
 
 		optimizerList.optimize(query, dataset, bindings);

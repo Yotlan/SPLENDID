@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.rdf4j.query.algebra.Join;
 import org.eclipse.rdf4j.query.algebra.TupleExpr;
 import org.eclipse.rdf4j.query.algebra.helpers.VarNameCollector;
@@ -40,7 +41,8 @@ public class PatternSelectivityOptimizer extends AbstractFederationOptimizer {
 	@Override
 	public TupleExpr optimizeBGP(TupleExpr bgp) {
 		
-		List<TupleExpr> queryExpressions = this.getBaseExpressions(bgp);
+		Pair<List<TupleExpr>, Long> qexp = this.getBaseExpressions(bgp);
+		List<TupleExpr> queryExpressions = qexp.getLeft();
 		final Map<TupleExpr, Double> costs = new HashMap<TupleExpr, Double>();
 		
 		// get cardinality for all query base expressions

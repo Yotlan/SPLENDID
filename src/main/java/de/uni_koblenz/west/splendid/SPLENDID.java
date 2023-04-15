@@ -77,6 +77,7 @@ import org.slf4j.LoggerFactory;
 
 import de.uni_koblenz.west.splendid.sources.SourceSelectorBase;
 import de.uni_koblenz.west.splendid.test.config.ConfigurationException;
+import de.uni_koblenz.west.splendid.QueryInfo;
 
 /**
  * Command Line Interface for the SPLENDID federation.
@@ -93,7 +94,7 @@ public class SPLENDID {
 
 	public static void main(String[] args) {
 
-		if (args.length < 7) {
+		if (args.length < 6) {
 			System.out.println(
 					"USAGE: java SPLENDID <config> <provenance> <timeout> <result> <explain> <stat> <query>\nONLY have theses args: ");
 			for (int i = 0; i < args.length; i++) {
@@ -103,24 +104,23 @@ public class SPLENDID {
 		}
 
 		String configFile = args[0];
-		String provenancetime = args[1];
+		// String provenancetime = args[1];
 		// System.out.println(provenancetime);
-		String timeout = args[2];
-		String resultfile = args[3];
+		String timeout = args[1];
+		String resultfile = args[2];
 		// System.out.println(resultfile);
-		String explanationfile = args[4];
+		String explanationfile = args[3];
 		// System.out.println(explanationfile);
-		String statfile = args[5];
+		String statfile = args[4];
 		// System.out.println(statfile);
-		List<String> queryFiles = Arrays.asList(Arrays.copyOfRange(args, 6, args.length));
+		List<String> queryFiles = Arrays.asList(Arrays.copyOfRange(args, 5, args.length));
 		// System.out.println(queryFiles);
 
 		try {
 			LOGGER.info("Init SPLENDID...");
 			SPLENDID splendid = new SPLENDID(configFile);
 			LOGGER.info("Exec SPARQL queries...");
-			splendid.execSparqlQueries(queryFiles, Integer.valueOf(timeout), resultfile, provenancetime,
-					explanationfile, statfile);
+			splendid.execSparqlQueries(queryFiles, Integer.valueOf(timeout), resultfile, explanationfile, statfile);
 		} catch (ConfigurationException e) {
 			e.printStackTrace();
 		}
@@ -207,8 +207,8 @@ public class SPLENDID {
 	 * 
 	 * @param queryFiles A list of files containing the queries.
 	 */
-	private void execSparqlQueries(List<String> queryFiles, int timeout, String resultfile, String provenancetime,
-			String explanationfile, String statfile) {
+	private void execSparqlQueries(List<String> queryFiles, int timeout, String resultfile, String explanationfile,
+			String statfile) {
 		if (queryFiles == null || queryFiles.size() == 0) {
 			LOGGER.warn("No query files specified");
 		}
@@ -235,7 +235,9 @@ public class SPLENDID {
 					// Reset nbAsk and planningtime to avoid issue
 					queryInfo.nbAskQuery.set(0);
 					queryInfo.planningTime = 0;
+					queryInfo.sourceSelectionTime = 0;
 
+					long startTime = System.currentTimeMillis();
 					TupleQueryResult res = tupleQuery.evaluate();
 
 					// int count=0;
@@ -247,10 +249,10 @@ public class SPLENDID {
 					// }
 
 					// Write source_selection_time.txt
-					// try (BufferedWriter sourceSelectionTimeWriter = new BufferedWriter(new
-					// FileWriter(sourceSelectionTimeFile))) {
-					// sourceSelectionTimeWriter.write(String.valueOf(queryInfo));
-					// }
+					try (BufferedWriter sourceSelectionTimeWriter = new BufferedWriter(
+							new FileWriter(sourceSelectionTimeFile))) {
+						sourceSelectionTimeWriter.write(String.valueOf(queryInfo.sourceSelectionTime));
+					}
 
 					// Write query_planning_time.txt
 					try (BufferedWriter planningTimeWriter = new BufferedWriter(new FileWriter(planningTimeFile))) {
@@ -264,13 +266,12 @@ public class SPLENDID {
 
 					// Write query_plan.txt
 					try (BufferedWriter queryPlanWriter = new BufferedWriter(new FileWriter(explanationfile))) {
-						queryPlanWriter.write(QueryPlanLog.getQueryPlan());
-						//queryPlanWriter.write(tupleQuery.toString());
+						// queryPlanWriter.write(QueryPlanLog.getQueryPlan());
+						queryPlanWriter.write(tupleQuery.toString());
 					}
 
 					// Write results.txt
 					try (OutputStream resultOutputStream = new FileOutputStream(resultfile)) {
-						long startTime = System.currentTimeMillis();
 						tupleQuery.evaluate(new SPARQLResultsCSVWriter(resultOutputStream));
 						long runTime = System.currentTimeMillis() - startTime;
 

@@ -24,7 +24,6 @@ import org.eclipse.rdf4j.common.iteration.CloseableIteration;
 import org.eclipse.rdf4j.common.iteration.DistinctIteration;
 import org.eclipse.rdf4j.common.iteration.EmptyIteration;
 import org.eclipse.rdf4j.common.iteration.UnionIteration;
-import org.eclipse.rdf4j.federated.structures.QueryInfo;
 
 import java.util.ArrayList;
 import java.util.HashSet;

@@ -22,6 +22,7 @@ package de.uni_koblenz.west.splendid.optimizer;
 
 import java.util.List;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.Dataset;
 import org.eclipse.rdf4j.query.algebra.StatementPattern;
@@ -106,16 +107,21 @@ public abstract class AbstractFederationOptimizer implements QueryOptimizer {
 	
 	// -------------------------------------------------------------------------
 	
-	protected List<TupleExpr> getBaseExpressions(TupleExpr expr) {
+	protected Pair<List<TupleExpr>, Long> getBaseExpressions(TupleExpr expr) {
 		
 		// get patterns and filter conditions from query model
 		List<StatementPattern> patterns = StatementPatternCollector.process(expr);
 		List<ValueExpr> conditions = FilterConditionCollector.process(expr);
 		
 		// create patterns with source mappings
+		long subSourceSelectionStartTime = System.currentTimeMillis();
 		List<MappedStatementPattern> mappedPatterns = this.sourceSelector.mapSources(patterns, null);
+		long subSourceSelectionEndTime = System.currentTimeMillis();
+		long subSourceSelectionTime = subSourceSelectionEndTime - subSourceSelectionStartTime;
 		
-		return this.queryBuilder.createSubQueries(mappedPatterns, conditions);
+		List<TupleExpr> tupleExprList = this.queryBuilder.createSubQueries(mappedPatterns, conditions);
+		Pair<List<TupleExpr>, Long> result = Pair.of(tupleExprList, subSourceSelectionTime);
+		return result;
 	}
 	
 	@Override

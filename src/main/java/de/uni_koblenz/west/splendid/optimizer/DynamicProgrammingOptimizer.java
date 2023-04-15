@@ -20,6 +20,8 @@
  */
 package de.uni_koblenz.west.splendid.optimizer;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -65,14 +67,19 @@ public class DynamicProgrammingOptimizer extends AbstractFederationOptimizer {
 	@Override
 	public TupleExpr optimizeBGP(TupleExpr bgp) {
 		
-		long time = System.currentTimeMillis();
+		long startTime = System.currentTimeMillis();
+		long sourceSelectionTime = 0L;
 		
 		try {
 			PlanCollection optPlans = new PlanCollection();
 			List<ValueExpr> conditions = FilterConditionCollector.process(bgp);
 
 			// create access plans for all statement patterns
-			List<TupleExpr> plans = this.getBaseExpressions(bgp);
+			Pair<List<TupleExpr>, Long> plansAndSSTime = this.getBaseExpressions(bgp);
+			List<TupleExpr> plans = plansAndSSTime.getLeft();
+			long subSourceSelectionTime = plansAndSSTime.getRight();
+			sourceSelectionTime += subSourceSelectionTime;
+
 			int count = plans.size();
 			prune(plans);
 			optPlans.add(new HashSet<TupleExpr>(plans), 1);
@@ -106,7 +113,9 @@ public class DynamicProgrammingOptimizer extends AbstractFederationOptimizer {
 			
 			//if (LOGGER.isDebugEnabled())
 				//LOGGER.info("time taken for optimization: " + (System.currentTimeMillis() - time));
-			SPLENDID.queryInfo.planningTime = System.currentTimeMillis() - time;
+			long endTime = System.currentTimeMillis();
+			SPLENDID.queryInfo.planningTime = endTime - startTime;
+			SPLENDID.queryInfo.sourceSelectionTime = sourceSelectionTime;
 			// return the final plan
 			if (optPlans.get(count).size() == 0)
 				// This is wrong: how do we get here?
