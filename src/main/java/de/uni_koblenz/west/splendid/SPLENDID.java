@@ -92,7 +92,7 @@ public class SPLENDID {
 
 	public static QueryInfo queryInfo = new QueryInfo();
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 
 		if (args.length < 6) {
 			System.out.println(
@@ -208,7 +208,7 @@ public class SPLENDID {
 	 * @param queryFiles A list of files containing the queries.
 	 */
 	private void execSparqlQueries(List<String> queryFiles, int timeout, String resultfile, String explanationfile,
-			String statfile) {
+			String statfile) throws IOException, FileNotFoundException {
 		if (queryFiles == null || queryFiles.size() == 0) {
 			LOGGER.warn("No query files specified");
 		}
@@ -218,13 +218,14 @@ public class SPLENDID {
 		String planningTimeFile = homeDir + "/planning_time.txt";
 		String askFile = homeDir + "/ask.txt";
 		String execTimeFile = homeDir + "/exec_time.txt";
+		String errorFile = homeDir + "/error.txt";
 		OutputStream out = System.out;
 
 		for (String queryString : loadSparqlQueries(queryFiles)) {
 			// LOGGER.info("Executing QUERY:\n" + queryString);
 			// LOGGER.info("RESULT:");
-			try {
-				RepositoryConnection con = repo.getConnection();
+			try (RepositoryConnection con = repo.getConnection()) {
+				//RepositoryConnection con = repo.getConnection();
 				Query query = con.prepareQuery(QueryLanguage.SPARQL, queryString);
 				if (query instanceof TupleQuery) {
 					// System.out.println("TUPLE QUERY...");
@@ -278,6 +279,12 @@ public class SPLENDID {
 						try (BufferedWriter execTimeWriter = new BufferedWriter(new FileWriter(execTimeFile))) {
 							execTimeWriter.write(String.valueOf(runTime));
 						}
+					} catch (QueryInterruptedException e) {
+						if (e.getMessage().equals("Query evaluation took too long")) {
+							try (BufferedWriter exceptionWriter = new BufferedWriter(new FileWriter(errorFile))) {
+								exceptionWriter.write("timeout");
+							}
+						}
 					}
 
 				}
@@ -289,20 +296,6 @@ public class SPLENDID {
 					BooleanQuery booleanQuery = (BooleanQuery) query;
 					System.out.println(booleanQuery.evaluate());
 				}
-			} catch (RepositoryException e) {
-				e.printStackTrace();
-			} catch (MalformedQueryException e) {
-				e.printStackTrace();
-			} catch (QueryInterruptedException e) {
-				e.printStackTrace();
-			} catch (QueryEvaluationException e) {
-				e.printStackTrace();
-			} catch (TupleQueryResultHandlerException e) {
-				e.printStackTrace();
-			} catch (RDFHandlerException e) {
-				e.printStackTrace();
-			} catch (Exception e) {
-				e.printStackTrace();
 			}
 			System.out.println("\n");
 		}

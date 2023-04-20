@@ -43,11 +43,22 @@ if [ $10 = true ]; then
     # run SourceSelectionEval
     #echo "java -cp $classpath:./bin de.uni_koblenz.west.evaluation.SourceSelectionEval $properties $provenanceFile"
     #sourceSelectionTime=$(echo `java -cp $classpath:./bin de.uni_koblenz.west.evaluation.SourceSelectionEval $properties $provenanceFile`)
-    mvn -q exec:java -Dexec.mainClass="de.uni_koblenz.west.evaluation.SourceSelectionEval" -Dexec.args="$properties $provenanceFile"
+    sourceSelectionTimeAddFile="$(dirname $resultFile)/source_selection_time_add.txt"
+    sstime=$(mvn -q exec:java -Dexec.mainClass="de.uni_koblenz.west.evaluation.SourceSelectionEval" -Dexec.args="$properties $provenanceFile")
+    status=$?
+    if [ $status -eq 0 ]; then
+        echo "$sstime" > $sourceSelectionTimeAddFile
+    else
+        exit $status
+    fi
     # sourceSelectionTime=$(echo `mvn -q exec:java -Dexec.mainClass="de.uni_koblenz.west.evaluation.SourceSelectionEval" -Dexec.args="$properties $provenanceFile"`)
-    
+fi
+
+if [ $11 = true ]; then
     # run SPLENDID
     #java -cp $classpath:./bin $mainclass2 $1 $sourceSelectionTime $3 $4 $6 $7 $8
-    # echo "$config $sourceSelectionTime $timeout $resultFile $explainFile $statFile $query"
+    echo "$config $sourceSelectionTime $timeout $resultFile $explainFile $statFile $query"
     mvn -q exec:java -Dexec.mainClass="de.uni_koblenz.west.splendid.SPLENDID" -Dexec.args="$config $timeout $resultFile $explainFile $statFile $query"
+    status=$?
+    exit $status;
 fi
