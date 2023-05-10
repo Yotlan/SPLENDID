@@ -113,14 +113,15 @@ public class SPLENDID {
 		// System.out.println(explanationfile);
 		String statfile = args[4];
 		// System.out.println(statfile);
-		List<String> queryFiles = Arrays.asList(Arrays.copyOfRange(args, 5, args.length));
+		String noExec = args[5];
+		List<String> queryFiles = Arrays.asList(Arrays.copyOfRange(args, 6, args.length));
 		// System.out.println(queryFiles);
 
 		try {
 			LOGGER.info("Init SPLENDID...");
 			SPLENDID splendid = new SPLENDID(configFile);
 			LOGGER.info("Exec SPARQL queries...");
-			splendid.execSparqlQueries(queryFiles, Integer.valueOf(timeout), resultfile, explanationfile, statfile);
+			splendid.execSparqlQueries(queryFiles, Integer.valueOf(timeout), resultfile, explanationfile, statfile, noExec);
 		} catch (ConfigurationException e) {
 			e.printStackTrace();
 		}
@@ -208,7 +209,7 @@ public class SPLENDID {
 	 * @param queryFiles A list of files containing the queries.
 	 */
 	private void execSparqlQueries(List<String> queryFiles, int timeout, String resultfile, String explanationfile,
-			String statfile) throws IOException, FileNotFoundException {
+			String statfile, String noExec) throws IOException, FileNotFoundException {
 		if (queryFiles == null || queryFiles.size() == 0) {
 			LOGGER.warn("No query files specified");
 		}
@@ -273,7 +274,9 @@ public class SPLENDID {
 
 					// Write results.txt
 					try (OutputStream resultOutputStream = new FileOutputStream(resultfile)) {
-						tupleQuery.evaluate(new SPARQLResultsCSVWriter(resultOutputStream));
+						if(!Boolean.valueOf(noExec)){
+							tupleQuery.evaluate(new SPARQLResultsCSVWriter(resultOutputStream));
+						}
 						long runTime = System.currentTimeMillis() - startTime;
 
 						try (BufferedWriter execTimeWriter = new BufferedWriter(new FileWriter(execTimeFile))) {

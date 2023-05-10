@@ -27,6 +27,7 @@ provenanceFile=$5
 explainFile=$6
 statFile=$7
 query=$8
+noExec=$12
 
 # include all jar files in classpath
 # for jar in lib/*.jar; do classpath=$classpath:$jar; done
@@ -57,8 +58,8 @@ fi
 if [ $11 = true ]; then
     # run SPLENDID
     #java -cp $classpath:./bin $mainclass2 $1 $sourceSelectionTime $3 $4 $6 $7 $8
-    echo "$config $sourceSelectionTime $timeout $resultFile $explainFile $statFile $query"
-    mvn -q exec:java -Dexec.mainClass="de.uni_koblenz.west.splendid.SPLENDID" -Dexec.args="$config $timeout $resultFile $explainFile $statFile $query"
+    echo "$config $sourceSelectionTime $timeout $resultFile $explainFile $statFile $noExec $query"
+    mvn -q exec:java -Dexec.mainClass="de.uni_koblenz.west.splendid.SPLENDID" -Dexec.args="$config $timeout $resultFile $explainFile $statFile $noExec $query"
     status=$?
     exit $status;
 fi
