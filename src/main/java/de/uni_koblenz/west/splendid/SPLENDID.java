@@ -276,11 +276,11 @@ public class SPLENDID {
 					try (OutputStream resultOutputStream = new FileOutputStream(resultfile)) {
 						if(!Boolean.valueOf(noExec)){
 							tupleQuery.evaluate(new SPARQLResultsCSVWriter(resultOutputStream));
-						}
-						long runTime = System.currentTimeMillis() - startTime;
+							long runTime = System.currentTimeMillis() - startTime;
 
-						try (BufferedWriter execTimeWriter = new BufferedWriter(new FileWriter(execTimeFile))) {
-							execTimeWriter.write(String.valueOf(runTime));
+							try (BufferedWriter execTimeWriter = new BufferedWriter(new FileWriter(execTimeFile))) {
+								execTimeWriter.write(String.valueOf(runTime));
+							}
 						}
 					} catch (QueryInterruptedException e) {
 						if (e.getMessage().equals("Query evaluation took too long")) {
