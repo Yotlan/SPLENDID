@@ -3,3 +3,4 @@ eval/**/*.csv
 eval/**/*.n3
 *.class
 /target/
+.m2/
